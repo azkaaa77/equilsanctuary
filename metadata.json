@@ -1,0 +1,6 @@
+{
+  "name": "EQUIL",
+  "description": "Digital sanctuary for Gen Z Indonesia: Mastering Finances, Mental Health, and Future Career.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

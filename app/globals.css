@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  /* Equilibrium v5.0 Core Palette */
+  --color-equil-paper: #F9F9FB;    /* Alabaster Paper */
+  --color-equil-onyx: #050505;     /* Deep Onyx */
+  --color-equil-mint: #2D6A4F;     /* Healing Mint */
+  --color-equil-coral: #FF8A80;    /* Soft Coral */
+  --color-equil-sage: #E8F0E8;     /* Sage Mist */
+  --color-equil-forest: #1A2421;   /* Forest */
+  --color-equil-sunlight: #FFF9E0; /* Soft Sunlight Accent */
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geist), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-mono), "Courier New", Courier, monospace;
+
+  --tracking-tightest: -0.06em;
+  --tracking-widest: 0.1em;
+}
+
+@layer base {
+  *, ::before, ::after {
+    box-sizing: border-box;
+    border-color: rgba(5, 5, 5, 0.05); /* Deep Onyx at very low opacity */
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-equil-paper text-equil-onyx font-sans antialiased overflow-x-hidden;
+    background-color: var(--color-equil-paper);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-black tracking-tightest leading-[0.85];
+  }
+
+  ::selection {
+    @apply bg-equil-mint/10 text-equil-mint;
+  }
+}
+
+@layer components {
+  /* High-Fashion Glassmorphism 2.0 (Crystal Edition) */
+  .crystal-glass {
+    @apply backdrop-blur-2xl bg-white/5 shadow-2xl;
+    border: 0.5px solid rgba(255, 255, 255, 0.4);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+  }
+
+  .status-label {
+    @apply font-display text-[9px] font-black uppercase tracking-[0.4em] opacity-40;
+  }
+
+  .btn-equil-primary {
+    @apply relative overflow-hidden bg-equil-onyx text-equil-paper px-10 py-5 rounded-full 
+           font-display font-black text-xs tracking-widest uppercase transition-all duration-500
+           hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .btn-equil-sage {
+    @apply bg-equil-sage text-equil-forest px-10 py-5 rounded-full 
+           font-display font-black text-xs tracking-widest uppercase transition-all duration-300;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-equil-paper);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(5, 5, 5, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(5, 5, 5, 0.2);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.hero-mascot {
+  animation: float 5s ease-in-out infinite;
+}
+
+/* ── ANTIGRAVITY DASHBOARD SYSTEM ── */
+
+@keyframes antigravity-float {
+  0%, 100% { transform: translateY(-3px); }
+  50%      { transform: translateY(3px); }
+}
+
+@keyframes pulse-mint {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.4); }
+}
+
+@keyframes spotlight-glow {
+  0%, 100% { box-shadow: inset 0 0 0px 0px transparent; }
+  50%      { box-shadow: inset 0 0 30px 2px rgba(232,240,232,0.4); }
+}
+
+.antigravity-card {
+  animation: antigravity-float 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.metric-number {
+  font-variant-numeric: tabular-nums;
+  -webkit-text-stroke: 0.5px var(--color-equil-onyx);
+}
+
+.calendar-cell {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.3s ease;
+}
+
+.calendar-cell:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px -4px rgba(45,106,79,0.12);
+}
+
+.dot-pulse {
+  animation: pulse-mint 3s ease-in-out infinite;
+}
+
+/* Typewriter cursor for ambient greeting */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.typewriter-cursor::after {
+  content: '|';
+  animation: blink-cursor 1s ease-in-out infinite;
+  color: var(--color-equil-mint);
+  font-weight: 300;
+  margin-left: 2px;
+}
