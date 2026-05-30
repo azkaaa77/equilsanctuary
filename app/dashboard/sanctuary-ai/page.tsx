@@ -390,6 +390,27 @@ export default function SanctuaryAIPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const userMessageCount = useRef(0);
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editSessionTitle, setEditSessionTitle] = useState('');
+
+  // CRUD state
+  const deleteSession = (id: string) => {
+    setSessions((prev) => {
+      const updated = prev.filter((s) => s.id !== id);
+      localStorage.setItem("ai_sessions", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const saveEditSession = (id: string) => {
+    if (!editSessionTitle.trim()) return;
+    setSessions(prev => {
+      const updated = prev.map(s => s.id === id ? { ...s, title: editSessionTitle } : s);
+      localStorage.setItem('ai_sessions', JSON.stringify(updated));
+      return updated;
+    });
+    setEditingSessionId(null);
+  };
 
   // Parallax
   useEffect(() => {
@@ -550,20 +571,20 @@ export default function SanctuaryAIPage() {
             transition: "transform 0.12s ease-out",
           }}
         >
-          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-[#141313]">
+          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-slate-900">
             {t.headline1}
             <br />
-            <span className="font-serif italic font-normal text-[#2D6A4F]/80">
+            <span className="font-serif italic font-normal text-emerald-700">
               {t.headline2}
             </span>
           </h1>
         </div>
-        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/40 uppercase">
+        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/60 uppercase">
           {t.subtitle}
         </p>
         <div className="mt-6 flex items-center gap-4">
           <div className="w-1.5 h-1.5 rounded-full bg-[#2D6A4F] animate-pulse shrink-0" />
-          <span className="text-[8px] font-mono tracking-[0.35em] text-[#141313]/30 uppercase">
+          <span className="text-[8px] font-mono tracking-[0.35em] text-[#141313]/50 uppercase">
             {t.statusLabel}
           </span>
           <div className="h-px flex-1 bg-black/5" />
@@ -571,15 +592,15 @@ export default function SanctuaryAIPage() {
       </section>
 
       {/* ── TABS ── */}
-      <div className="flex gap-0 border-b border-black/8">
+      <div className="flex bg-gray-100/50 p-1 rounded-full gap-1">
         {(["chat", "history", "insights"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 border-b-2 -mb-px ${
+            className={`flex-1 py-2.5 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-full ${
               activeTab === tab
-                ? "border-[#141313] text-[#141313]"
-                : "border-transparent text-[#141313]/30 hover:text-[#141313]/60"
+                ? "bg-white text-emerald-800 shadow-sm"
+                : "text-gray-500 hover:text-slate-700 px-4 py-2"
             }`}
           >
             {t.tabs[tab]}
@@ -591,7 +612,7 @@ export default function SanctuaryAIPage() {
       {activeTab === "chat" && (
         <section className="space-y-6">
           <div className="flex items-center gap-4">
-            <span className="text-[8px] font-mono tracking-[0.3em] text-[#141313]/25 uppercase shrink-0">
+            <span className="text-[8px] font-mono tracking-[0.3em] text-[#141313]/60 uppercase shrink-0">
               {t.chat.stressLabel}
             </span>
             <div className="flex-1 h-[2px] bg-black/5 rounded-full overflow-hidden">
@@ -628,13 +649,13 @@ export default function SanctuaryAIPage() {
                 <div
                   className={`max-w-[78%] ${
                     msg.role === "user"
-                      ? "bg-[#141313] text-[#F9F9F9] rounded-[16px] rounded-tr-[4px] px-4 py-3"
-                      : "text-[#141313]/75 pl-0 pr-4 py-1"
+                      ? "bg-emerald-700 text-white rounded-2xl rounded-br-sm px-4 py-3 shadow-sm"
+                      : "bg-white border border-gray-100 shadow-sm text-slate-700 rounded-2xl rounded-bl-sm px-4 py-3"
                   }`}
                 >
                   <p
                     className={`text-[12px] leading-relaxed font-sans whitespace-pre-wrap ${
-                      msg.role === "ai" ? "text-[#141313]/70" : "text-[#F9F9F9]"
+                      msg.role === "ai" ? "text-slate-700" : "text-white"
                     }`}
                   >
                     {msg.content}
@@ -642,8 +663,8 @@ export default function SanctuaryAIPage() {
                   <p
                     className={`text-[7px] font-mono mt-1.5 ${
                       msg.role === "user"
-                        ? "text-[#F9F9F9]/30 text-right"
-                        : "text-[#141313]/20"
+                        ? "text-white/50 text-right"
+                        : "text-slate-400"
                     }`}
                   >
                     {new Date(msg.timestamp).toLocaleTimeString(
@@ -660,15 +681,15 @@ export default function SanctuaryAIPage() {
                 <div className="w-5 h-5 rounded-full bg-[#2D6A4F]/10 flex items-center justify-center shrink-0">
                   <span className="text-[7px] text-[#2D6A4F]/60">AI</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-4 py-3">
+                <div className="flex items-center gap-1.5 bg-white border border-gray-100 shadow-sm rounded-2xl px-4 py-3">
                   {[0, 0.2, 0.4].map((delay, i) => (
                     <div
                       key={i}
-                      className="w-1.5 h-1.5 rounded-full bg-[#141313]/20 animate-bounce"
+                      className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce"
                       style={{ animationDelay: `${delay}s` }}
                     />
                   ))}
-                  <span className="text-[8px] font-mono text-[#141313]/25 ml-2">
+                  <span className="text-[8px] font-mono text-slate-500 ml-2">
                     {t.chat.typing}
                   </span>
                 </div>
@@ -678,8 +699,8 @@ export default function SanctuaryAIPage() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="border-t border-black/8 pt-5 space-y-3">
-            <div className="flex gap-3 items-end">
+          <div className="border-t border-gray-100 pt-5 space-y-3">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-2xl px-4 py-3 flex items-end gap-3">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -688,15 +709,15 @@ export default function SanctuaryAIPage() {
                 placeholder={t.chat.inputPlaceholder}
                 rows={2}
                 disabled={isTyping}
-                className="flex-1 bg-transparent outline-none resize-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 font-sans leading-relaxed border-b border-black/10 focus:border-[#141313] pb-2 transition-colors disabled:opacity-40"
+                className="flex-1 bg-transparent outline-none resize-none text-sm text-[#141313]/80 placeholder:text-gray-400 font-sans leading-relaxed disabled:opacity-40"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isTyping}
-                className={`px-6 py-2.5 rounded-full text-[8px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 shrink-0 ${
+                className={`px-4 py-2 rounded-xl text-[8px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 shrink-0 font-medium ${
                   input.trim() && !isTyping
-                    ? "bg-[#141313] text-[#F9F9F9] hover:bg-[#2D6A4F]"
-                    : "bg-black/5 text-[#141313]/20 cursor-not-allowed"
+                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
                 }`}
               >
                 {t.chat.send}
@@ -704,12 +725,12 @@ export default function SanctuaryAIPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <p className="text-[8px] font-sans text-[#141313]/20 italic max-w-sm leading-relaxed">
+              <p className="text-[8px] font-sans text-[#141313]/40 italic max-w-sm leading-relaxed">
                 {t.chat.disclaimer}
               </p>
               <button
                 onClick={startNewSession}
-                className="text-[8px] font-mono tracking-[0.25em] uppercase text-[#141313]/25 hover:text-[#141313]/50 transition-colors shrink-0 ml-4"
+                className="text-[8px] font-mono tracking-[0.25em] uppercase text-[#141313]/40 hover:text-[#141313]/60 transition-colors shrink-0 ml-4"
               >
                 + {t.chat.newSession}
               </button>
@@ -725,13 +746,13 @@ export default function SanctuaryAIPage() {
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">
               {t.history.title}
             </h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest">
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest">
               {t.history.subtitle}
             </p>
           </div>
 
           {sessions.length === 0 ? (
-            <p className="text-[10px] font-mono text-[#141313]/25 italic">
+            <p className="text-[10px] font-mono text-[#141313]/50 italic">
               {t.history.empty}
             </p>
           ) : (
@@ -741,47 +762,86 @@ export default function SanctuaryAIPage() {
                 return (
                   <div
                     key={session.id}
-                    className="py-5 border-b border-black/5 group"
+                    className="group bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-row items-center justify-between p-4 mb-3 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                        style={{ backgroundColor: cfg.dot, opacity: 0.6 }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-sans text-[#141313]/70 mb-1.5 leading-snug">
-                          "{session.title}"
-                        </p>
-                        <div className="flex items-center gap-3">
-                          <span className="text-[7px] font-mono text-[#141313]/20 tracking-widest">
-                            {new Date(session.startedAt).toLocaleDateString(
-                              language === "id" ? "id-ID" : "en-US",
-                              {
-                                weekday: "long",
-                                day: "numeric",
-                                month: "short",
-                              },
-                            )}
-                          </span>
-                          <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
-                          <span className="text-[7px] font-mono text-[#141313]/20 tracking-widest">
-                            {
-                              session.messages.filter((m) => m.role === "user")
-                                .length
-                            }{" "}
-                            {t.history.messages}
-                          </span>
-                          <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
-                          <span
-                            className="text-[7px] font-mono tracking-widest"
-                            style={{ color: cfg.dot, opacity: 0.8 }}
-                          >
-                            {t.history.avgStress}:{" "}
-                            {language === "id" ? cfg.labelId : cfg.labelEn}
-                          </span>
+                    {editingSessionId === session.id ? (
+                      <div className="flex-1 space-y-3">
+                        <input
+                          value={editSessionTitle}
+                          onChange={e => setEditSessionTitle(e.target.value)}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                          placeholder="Session Title"
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={() => saveEditSession(session.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
+                            {language === 'id' ? 'SIMPAN' : 'SAVE'}
+                          </button>
+                          <button onClick={() => setEditingSessionId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
+                            {language === 'id' ? 'BATAL' : 'CANCEL'}
+                          </button>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div className="flex-1 pr-4 flex items-start gap-4">
+                          <div
+                            className="w-2 h-2 rounded-full shrink-0 mt-1.5"
+                            style={{ backgroundColor: cfg.dot, opacity: 0.8 }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-sans text-[#141313]/70 mb-2 leading-snug">
+                              "{session.title}"
+                            </p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="text-[7px] font-mono text-[#141313]/50 tracking-widest">
+                                {new Date(session.startedAt).toLocaleDateString(
+                                  language === "id" ? "id-ID" : "en-US",
+                                  {
+                                    weekday: "long",
+                                    day: "numeric",
+                                    month: "short",
+                                  },
+                                )}
+                              </span>
+                              <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
+                              <span className="text-[7px] font-mono text-[#141313]/50 tracking-widest">
+                                {
+                                  session.messages.filter((m) => m.role === "user")
+                                    .length
+                                }{" "}
+                                {t.history.messages}
+                              </span>
+                              <span
+                                className="text-[7px] font-mono tracking-widest px-2 py-0.5 rounded-md"
+                                style={{
+                                  backgroundColor: cfg.dot + "20",
+                                  color: cfg.dot,
+                                }}
+                              >
+                                {t.history.avgStress}:{" "}
+                                {language === "id" ? cfg.labelId : cfg.labelEn}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0 m-0">
+                          <button
+                            onClick={() => { setEditingSessionId(session.id); setEditSessionTitle(session.title); }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                            title="Rename session"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => deleteSession(session.id)}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            title="Delete session"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 );
               })}
@@ -797,13 +857,13 @@ export default function SanctuaryAIPage() {
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">
               {t.insights.title}
             </h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest">
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest">
               {t.insights.subtitle}
             </p>
           </div>
 
           {sessions.length < 2 ? (
-            <p className="text-[10px] font-mono text-[#141313]/25 italic">
+            <p className="text-[10px] font-mono text-[#141313]/50 italic">
               {t.insights.noData}
             </p>
           ) : (
@@ -830,10 +890,10 @@ export default function SanctuaryAIPage() {
                   },
                 ].map((s, i) => (
                   <div key={i}>
-                    <span className="block text-2xl font-extrabold tracking-tighter text-[#141313]/15 leading-none mb-1">
+                    <span className="block text-2xl font-extrabold tracking-tighter text-slate-800 leading-none mb-1">
                       {s.value}
                     </span>
-                    <span className="text-[8px] font-mono tracking-widest text-[#141313]/25 uppercase">
+                    <span className="text-[8px] font-mono tracking-widest text-[#141313]/60 uppercase">
                       {s.label}
                     </span>
                   </div>
@@ -841,7 +901,7 @@ export default function SanctuaryAIPage() {
               </div>
 
               <div>
-                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/25 uppercase block mb-5">
+                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/60 uppercase block mb-5">
                   {t.insights.stressDistribution}
                 </span>
                 <div className="space-y-3">
@@ -852,7 +912,7 @@ export default function SanctuaryAIPage() {
                     const cfg = STRESS_CONFIG[level];
                     return (
                       <div key={level} className="flex items-center gap-4">
-                        <span className="w-20 text-[8px] font-mono text-[#141313]/30 uppercase shrink-0">
+                        <span className="w-20 text-[8px] font-mono text-[#141313]/60 uppercase shrink-0">
                           {language === "id" ? cfg.labelId : cfg.labelEn}
                         </span>
                         <div className="flex-1 h-[2px] bg-black/5 rounded-full overflow-hidden">
@@ -865,7 +925,7 @@ export default function SanctuaryAIPage() {
                             }}
                           />
                         </div>
-                        <span className="text-[8px] font-mono text-[#141313]/20 w-6 text-right shrink-0">
+                        <span className="text-[8px] font-mono text-[#141313]/50 w-6 text-right shrink-0">
                           {count}
                         </span>
                       </div>
@@ -875,7 +935,7 @@ export default function SanctuaryAIPage() {
               </div>
 
               <div>
-                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/25 uppercase block mb-5">
+                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/60 uppercase block mb-5">
                   {t.insights.timeline}
                 </span>
                 <div className="relative">
@@ -897,7 +957,7 @@ export default function SanctuaryAIPage() {
                               "{session.title.slice(0, 40)}
                               {session.title.length > 40 ? "..." : ""}"
                             </p>
-                            <span className="text-[7px] font-mono text-[#141313]/20">
+                            <span className="text-[7px] font-mono text-[#141313]/40">
                               {new Date(session.startedAt).toLocaleDateString(
                                 language === "id" ? "id-ID" : "en-US",
                                 { day: "numeric", month: "short" },

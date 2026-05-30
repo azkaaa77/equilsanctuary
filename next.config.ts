@@ -1,3 +1,4 @@
+import path from 'path';
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -8,6 +9,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  outputFileTracingRoot: path.join(__dirname),
   // Allow access to remote image placeholder.
   images: {
     remotePatterns: [

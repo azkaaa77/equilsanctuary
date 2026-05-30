@@ -188,6 +188,10 @@ export default function MentalSanctuaryPage() {
     { q: string; a: string }[]
   >([]);
 
+  // ── CRUD State ──
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editEntryText, setEditEntryText] = useState("");
+
   // Parallax
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -231,6 +235,27 @@ export default function MentalSanctuaryPage() {
     setSaved(true);
     setJournalText("");
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  // ── JOURNAL CRUD ──
+  const deleteEntry = (id: string) => {
+    const updated = entries.filter((e) => e.id !== id);
+    setEntries(updated);
+    localStorage.setItem("sanctuary_journal", JSON.stringify(updated));
+  };
+
+  const saveEditEntry = (id: string) => {
+    if (!editEntryText.trim()) return;
+    const updated = entries.map((e) =>
+      e.id === id ? { ...e, text: editEntryText } : e,
+    );
+    setEntries(updated);
+    localStorage.setItem("sanctuary_journal", JSON.stringify(updated));
+    setEditingEntryId(null);
+  };
+
+  const deleteReflect = (index: number) => {
+    setSavedReflects((prev) => prev.filter((_, i) => i !== index));
   };
 
   // ── LOG MOOD ──
@@ -369,19 +394,16 @@ export default function MentalSanctuaryPage() {
             transition: "transform 0.12s ease-out",
           }}
         >
-          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-[#141313]">
+          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-slate-900">
             {t.headline1}
             <br />
-            <span
-              className="font-serif italic font-normal ml-2"
-              style={{ color: "#2D6A4F" }}
-            >
+            <span className="font-serif italic font-normal text-emerald-700">
               {t.headline2}
             </span>
           </h1>
         </div>
 
-        <p className="mt-6 text-sm font-mono tracking-[0.15em] text-[#141313]/50 uppercase">
+        <p className="mt-6 text-sm font-mono tracking-[0.15em] text-[#141313]/60 uppercase">
           {t.subtitle}
         </p>
 
@@ -397,15 +419,15 @@ export default function MentalSanctuaryPage() {
 
       {/* ── TAB NAVIGATION ── */}
       <section>
-        <div className="flex border border-black/5 rounded-[4px] overflow-hidden bg-white/60">
+        <div className="flex bg-gray-100/60 p-1 rounded-full gap-1">
           {(["journal", "mood", "breathe", "reflect"] as Tab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 ${
+              className={`flex-1 py-2.5 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-full ${
                 activeTab === tab
-                  ? "bg-[#141313] text-[#F9F9F9]"
-                  : "text-[#141313]/40 hover:text-[#141313] hover:bg-black/[0.02]"
+                  ? "bg-white text-emerald-800 shadow-sm"
+                  : "text-[#141313]/40 hover:text-[#141313]"
               }`}
             >
               {t.tabs[tab]}
@@ -420,14 +442,14 @@ export default function MentalSanctuaryPage() {
       {activeTab === "journal" && (
         <section className="space-y-8">
           {/* Write panel */}
-          <div className="border border-black/5 bg-white/70 p-8 rounded-[4px] space-y-6">
+          <div className="bg-white shadow-sm ring-1 ring-gray-200/50 p-8 rounded-2xl space-y-6">
             <h2 className="text-xs font-mono font-bold tracking-[0.3em] uppercase text-[#141313]/60">
               {t.journal.title}
             </h2>
 
             {/* Mood selector */}
             <div>
-              <p className="text-[9px] font-mono tracking-[0.25em] uppercase text-[#141313]/40 mb-3">
+              <p className="text-[9px] font-mono tracking-[0.25em] uppercase text-[#141313]/60 mb-3">
                 {t.journal.moodLabel}
               </p>
               <div className="flex gap-3">
@@ -461,7 +483,7 @@ export default function MentalSanctuaryPage() {
               onChange={(e) => setJournalText(e.target.value)}
               placeholder={t.journal.placeholder}
               rows={6}
-              className="w-full bg-transparent border-b border-black/10 focus:border-[#2D6A4F] outline-none resize-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 py-3 transition-colors font-sans leading-relaxed"
+              className="w-full bg-transparent border-b border-black/10 focus:border-[#2D6A4F] outline-none resize-none text-sm text-[#141313]/80 placeholder:text-[#141313]/40 py-3 transition-colors font-sans leading-relaxed"
             />
 
             {/* Save button */}
@@ -480,11 +502,11 @@ export default function MentalSanctuaryPage() {
               <button
                 onClick={handleSaveJournal}
                 disabled={!journalText.trim()}
-                className={`px-8 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-[2px] ${
+                className={`px-8 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-xl ${
                   saved
-                    ? "bg-[#2D6A4F] text-white"
+                    ? "bg-emerald-600 text-white"
                     : journalText.trim()
-                      ? "bg-[#141313] text-[#F9F9F9] hover:bg-[#2D6A4F]"
+                      ? "bg-emerald-700 text-white hover:bg-emerald-800"
                       : "bg-black/5 text-[#141313]/20 cursor-not-allowed"
                 }`}
               >
@@ -507,22 +529,70 @@ export default function MentalSanctuaryPage() {
                 {entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="group border border-black/5 bg-white/50 hover:bg-white/80 transition-colors p-6 rounded-[4px]"
+                    className="group bg-white shadow-sm ring-1 ring-gray-100 hover:shadow-md transition-all flex flex-row items-center justify-between p-4 rounded-2xl"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-[9px] font-mono tracking-widest text-[#141313]/40 uppercase">
-                        {entry.date}
-                      </span>
-                      <span
-                        className="text-lg"
-                        style={{ color: moodColors[entry.mood] }}
-                      >
-                        {moodGlyphs[entry.mood]}
-                      </span>
-                    </div>
-                    <p className="text-sm text-[#141313]/70 leading-relaxed line-clamp-3 font-sans">
-                      {entry.text}
-                    </p>
+                    {editingEntryId === entry.id ? (
+                      <div className="flex-1 space-y-3">
+                        <textarea
+                          value={editEntryText}
+                          onChange={(e) => setEditEntryText(e.target.value)}
+                          rows={4}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 outline-none resize-none text-sm text-[#141313]/80 font-sans leading-relaxed focus:border-emerald-400 transition-colors"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveEditEntry(entry.id)}
+                            className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full transition-colors"
+                          >
+                            {language === "id" ? "SIMPAN" : "SAVE"}
+                          </button>
+                          <button
+                            onClick={() => setEditingEntryId(null)}
+                            className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors"
+                          >
+                            {language === "id" ? "BATAL" : "CANCEL"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex-1 pr-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[9px] font-mono tracking-widest text-[#141313]/60 uppercase">
+                              {entry.date}
+                            </span>
+                            <span
+                              className="text-lg"
+                              style={{ color: moodColors[entry.mood] }}
+                            >
+                              {moodGlyphs[entry.mood]}
+                            </span>
+                          </div>
+                          <p className="text-sm text-[#141313]/70 leading-relaxed line-clamp-3 font-sans">
+                            {entry.text}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0 m-0">
+                          <button
+                            onClick={() => {
+                              setEditingEntryId(entry.id);
+                              setEditEntryText(entry.text);
+                            }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                            title="Edit"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => deleteEntry(entry.id)}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            title="Delete"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -536,11 +606,11 @@ export default function MentalSanctuaryPage() {
       {/* ─────────────────────────────────────────────────────── */}
       {activeTab === "mood" && (
         <section className="space-y-8">
-          <div className="border border-black/5 bg-white/70 p-8 rounded-[4px]">
+          <div className="bg-white shadow-sm ring-1 ring-gray-200/50 p-8 rounded-2xl">
             <h2 className="text-xs font-mono font-bold tracking-[0.3em] uppercase text-[#141313]/60 mb-1">
               {t.mood.title}
             </h2>
-            <p className="text-[9px] font-mono text-[#141313]/30 tracking-widest mb-8">
+            <p className="text-[9px] font-mono text-[#141313]/50 tracking-widest mb-8">
               {t.mood.subtitle}
             </p>
 
@@ -550,10 +620,10 @@ export default function MentalSanctuaryPage() {
                 <button
                   key={m}
                   onClick={() => setCurrentMood(m)}
-                  className={`flex flex-col items-center gap-3 py-6 border rounded-[4px] transition-all duration-300 group ${
+                  className={`flex flex-col items-center gap-3 py-6 border rounded-2xl transition-all duration-300 group ${
                     currentMood === m
-                      ? "border-[#2D6A4F] bg-[#2D6A4F]/5 scale-[1.02]"
-                      : "border-black/5 bg-white/50 hover:border-black/15"
+                      ? "border-[#2D6A4F] bg-[#2D6A4F]/5 scale-[1.02] shadow-sm"
+                      : "border-gray-100 bg-white shadow-sm hover:border-gray-200 hover:shadow-md"
                   }`}
                 >
                   <span
@@ -579,10 +649,10 @@ export default function MentalSanctuaryPage() {
 
             <button
               onClick={handleLogMood}
-              className={`w-full py-4 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-[2px] ${
+              className={`w-full py-4 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-xl ${
                 moodLogged
-                  ? "bg-[#2D6A4F] text-white"
-                  : "bg-[#141313] text-[#F9F9F9] hover:bg-[#2D6A4F]"
+                  ? "bg-emerald-600 text-white"
+                  : "bg-emerald-700 text-white hover:bg-emerald-800"
               }`}
             >
               {moodLogged ? "✓ LOGGED" : t.mood.log}
@@ -591,17 +661,17 @@ export default function MentalSanctuaryPage() {
 
           {/* 7-day history */}
           <div>
-            <h3 className="text-[9px] font-mono tracking-[0.3em] uppercase text-[#141313]/40 mb-4">
+            <h3 className="text-[9px] font-mono tracking-[0.3em] uppercase text-[#141313]/60 mb-4">
               {t.mood.history}
             </h3>
             {moodHistory.length === 0 ? (
-              <p className="text-xs text-[#141313]/30 font-mono italic">
+              <p className="text-xs text-[#141313]/50 font-mono italic">
                 {language === "id"
                   ? "Belum ada riwayat mood."
                   : "No mood history yet."}
               </p>
             ) : (
-              <div className="border border-black/5 bg-white/50 p-6 rounded-[4px]">
+              <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-100 p-4">
                 {/* Bar chart */}
                 <div className="flex items-end gap-3 h-24">
                   {moodHistory.map((entry, i) => (
@@ -632,7 +702,7 @@ export default function MentalSanctuaryPage() {
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: moodColors[m] }}
                       />
-                      <span className="text-[8px] font-mono text-[#141313]/40 uppercase">
+                      <span className="text-[8px] font-mono text-[#141313]/60 uppercase">
                         {t.mood.levels[m - 1]}
                       </span>
                     </div>
@@ -649,11 +719,11 @@ export default function MentalSanctuaryPage() {
       {/* ─────────────────────────────────────────────────────── */}
       {activeTab === "breathe" && (
         <section className="space-y-8">
-          <div className="border border-black/5 bg-white/70 p-8 rounded-[4px] text-center">
+          <div className="bg-white shadow-sm ring-1 ring-gray-200/50 p-8 rounded-2xl text-center">
             <h2 className="text-xs font-mono font-bold tracking-[0.3em] uppercase text-[#141313]/60 mb-1">
               {t.breathe.title}
             </h2>
-            <p className="text-[9px] font-mono text-[#141313]/30 tracking-widest mb-12">
+            <p className="text-[9px] font-mono text-[#141313]/50 tracking-widest mb-12">
               {t.breathe.subtitle}
             </p>
 
@@ -718,10 +788,10 @@ export default function MentalSanctuaryPage() {
               {/* Control button */}
               <button
                 onClick={isBreathing ? stopBreathing : startBreathing}
-                className={`px-12 py-4 text-[9px] font-mono font-bold tracking-[0.4em] uppercase transition-all duration-300 rounded-[2px] ${
+                className={`px-12 py-4 text-[9px] font-mono font-bold tracking-[0.4em] uppercase transition-all duration-300 rounded-full ${
                   isBreathing
-                    ? "bg-[#FF8A80]/20 text-[#FF8A80] border border-[#FF8A80]/30 hover:bg-[#FF8A80]/30"
-                    : "bg-[#141313] text-[#F9F9F9] hover:bg-[#2D6A4F]"
+                    ? "bg-rose-100 text-rose-500 border border-rose-200 hover:bg-rose-200"
+                    : "bg-emerald-700 text-white hover:bg-emerald-800"
                 }`}
               >
                 {isBreathing ? t.breathe.stop : t.breathe.start}
@@ -734,10 +804,10 @@ export default function MentalSanctuaryPage() {
             {breathePhases.map((phase) => (
               <div
                 key={phase}
-                className={`border rounded-[4px] p-4 text-center transition-all duration-500 ${
+                className={`border rounded-2xl p-4 text-center transition-all duration-500 ${
                   isBreathing && breathePhase === phase
-                    ? "border-[#2D6A4F]/40 bg-[#2D6A4F]/5"
-                    : "border-black/5 bg-white/50"
+                    ? "border-[#2D6A4F]/40 bg-[#2D6A4F]/5 shadow-sm"
+                    : "border-gray-100 bg-white shadow-sm"
                 }`}
               >
                 <div
@@ -755,7 +825,7 @@ export default function MentalSanctuaryPage() {
                         ? "↓"
                         : "○"}
                 </div>
-                <span className="text-[8px] font-mono tracking-[0.2em] uppercase text-[#141313]/40">
+                <span className="text-[8px] font-mono tracking-[0.2em] uppercase text-[#141313]/60">
                   {t.breathe[phase as keyof typeof t.breathe] as string} · 4s
                 </span>
               </div>
@@ -769,13 +839,13 @@ export default function MentalSanctuaryPage() {
       {/* ─────────────────────────────────────────────────────── */}
       {activeTab === "reflect" && (
         <section className="space-y-8">
-          <div className="border border-black/5 bg-white/70 p-8 rounded-[4px] space-y-6">
+          <div className="bg-white shadow-sm ring-1 ring-gray-200/50 p-8 rounded-2xl space-y-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xs font-mono font-bold tracking-[0.3em] uppercase text-[#141313]/60 mb-1">
                   {t.reflect.title}
                 </h2>
-                <p className="text-[9px] font-mono text-[#141313]/30 tracking-widest">
+                <p className="text-[9px] font-mono text-[#141313]/50 tracking-widest">
                   {t.reflect.subtitle}
                 </p>
               </div>
@@ -797,7 +867,7 @@ export default function MentalSanctuaryPage() {
               onChange={(e) => setReflectAnswer(e.target.value)}
               placeholder={t.reflect.answer}
               rows={5}
-              className="w-full bg-transparent border-b border-black/10 focus:border-[#2D6A4F] outline-none resize-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 py-3 transition-colors font-sans leading-relaxed"
+              className="w-full bg-transparent border-b border-black/10 focus:border-[#2D6A4F] outline-none resize-none text-sm text-[#141313]/80 placeholder:text-[#141313]/40 py-3 transition-colors font-sans leading-relaxed"
             />
 
             <div className="flex items-center justify-between">
@@ -821,7 +891,7 @@ export default function MentalSanctuaryPage() {
 
               <button
                 onClick={handleNextQuestion}
-                className="px-8 py-3 bg-[#141313] text-[#F9F9F9] text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 hover:bg-[#2D6A4F] rounded-[2px]"
+                className="px-8 py-3 bg-emerald-700 text-white text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 hover:bg-emerald-800 rounded-xl"
               >
                 {t.reflect.next} →
               </button>
@@ -837,14 +907,25 @@ export default function MentalSanctuaryPage() {
               {savedReflects.map((r, i) => (
                 <div
                   key={i}
-                  className="border border-black/5 bg-white/50 p-6 rounded-[4px] space-y-3"
+                  className="group bg-white shadow-sm ring-1 ring-gray-100 hover:shadow-md transition-all flex flex-row items-center justify-between p-4 rounded-2xl"
                 >
-                  <p className="text-[9px] font-mono tracking-widest text-[#2D6A4F]/60 uppercase italic">
-                    {r.q}
-                  </p>
-                  <p className="text-sm text-[#141313]/70 leading-relaxed font-sans">
-                    {r.a}
-                  </p>
+                  <div className="flex-1 pr-4">
+                    <p className="text-[9px] font-mono tracking-widest text-emerald-700/70 uppercase italic mb-1">
+                      {r.q}
+                    </p>
+                    <p className="text-sm text-[#141313]/70 leading-relaxed font-sans">
+                      {r.a}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2 shrink-0 m-0">
+                    <button
+                      onClick={() => deleteReflect(i)}
+                      className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                      title="Delete"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -267,10 +267,15 @@ export default function ImpulseShieldPage() {
   const [logStress, setLogStress] = useState<StressLevel>(3);
   const [logResisted, setLogResisted] = useState(true);
   const [logNote, setLogNote] = useState('');
+  const [editingLogId, setEditingLogId] = useState<string | null>(null);
+  const [editLogTrigger, setEditLogTrigger] = useState('');
+  const [editLogNote, setEditLogNote] = useState('');
 
   // Rules state
   const [rules, setRules] = useState<GuardRule[]>([]);
   const [newRule, setNewRule] = useState('');
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [editRuleText, setEditRuleText] = useState('');
 
   // Encouragement quote rotation
   const [quoteIdx, setQuoteIdx] = useState(0);
@@ -399,6 +404,28 @@ export default function ImpulseShieldPage() {
     localStorage.setItem('is_rules', JSON.stringify(updated));
   };
 
+  const saveEditRule = (id: string) => {
+    if (!editRuleText.trim()) return;
+    const updated = rules.map(r => r.id === id ? { ...r, text: editRuleText } : r);
+    setRules(updated);
+    localStorage.setItem('is_rules', JSON.stringify(updated));
+    setEditingRuleId(null);
+  };
+
+  const deleteImpulseLog = (id: string) => {
+    const updated = impulseLog.filter(l => l.id !== id);
+    setImpulseLog(updated);
+    localStorage.setItem('is_log', JSON.stringify(updated));
+  };
+
+  const saveEditImpulseLog = (id: string) => {
+    if (!editLogTrigger.trim()) return;
+    const updated = impulseLog.map(l => l.id === id ? { ...l, trigger: editLogTrigger, note: editLogNote } : l);
+    setImpulseLog(updated);
+    localStorage.setItem('is_log', JSON.stringify(updated));
+    setEditingLogId(null);
+  };
+
   // ─────────────────────────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────────────────────────
@@ -421,18 +448,18 @@ export default function ImpulseShieldPage() {
         </span>
 
         <div style={{ transform: `translate(${mousePos.x * 7}px, ${mousePos.y * 3}px)`, transition: 'transform 0.12s ease-out' }}>
-          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-[#141313]">
+          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-slate-900">
             {t.headline1}<br />
-            <span className="font-serif italic font-normal text-[#141313]/70">{t.headline2}</span>
+            <span className="font-serif italic font-normal text-emerald-700">{t.headline2}</span>
           </h1>
         </div>
 
-        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/40 uppercase">{t.subtitle}</p>
+        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/60 uppercase">{t.subtitle}</p>
 
         {/* Rotating encouragement quote */}
         <div className="mt-6 flex items-center gap-4">
           <div className="h-px w-12 bg-[#141313]/10" />
-          <p className="text-[10px] font-sans italic text-[#141313]/30 transition-all duration-700">
+          <p className="text-[10px] font-sans italic text-[#141313]/50 transition-all duration-700">
             {t.patterns.encouragement[quoteIdx]}
           </p>
         </div>
@@ -445,15 +472,15 @@ export default function ImpulseShieldPage() {
       </section>
 
       {/* ── TABS ── */}
-      <div className="flex gap-0 border-b border-black/8">
+      <div className="flex bg-gray-100/50 p-1 rounded-full gap-1">
         {(['vault', 'tracker', 'patterns', 'rules'] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 border-b-2 -mb-px ${
+            className={`flex-1 py-2.5 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-full ${
               activeTab === tab
-                ? 'border-[#141313] text-[#141313]'
-                : 'border-transparent text-[#141313]/30 hover:text-[#141313]/60'
+                ? 'bg-white text-emerald-800 shadow-sm'
+                : 'text-[#141313]/40 hover:text-[#141313]'
             }`}
           >
             {t.tabs[tab]}
@@ -468,7 +495,7 @@ export default function ImpulseShieldPage() {
         <section className="space-y-10">
           <div>
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">{t.vault.title}</h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest max-w-lg">{t.vault.subtitle}</p>
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest max-w-lg">{t.vault.subtitle}</p>
           </div>
 
           {/* Saved total */}
@@ -488,7 +515,7 @@ export default function ImpulseShieldPage() {
               className={`px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 ${
                 addingToVault
                   ? 'border border-black/15 text-[#141313]/40 hover:text-[#141313]'
-                  : 'bg-[#141313] text-[#F9F9F9] hover:bg-[#1A2421]'
+                  : 'bg-emerald-700 text-white hover:bg-emerald-800'
               }`}
             >
               {addingToVault ? '× BATAL' : `+ ${t.vault.addTitle}`}
@@ -505,7 +532,7 @@ export default function ImpulseShieldPage() {
                   placeholder={t.vault.namePlaceholder}
                   value={itemName}
                   onChange={e => setItemName(e.target.value)}
-                  className="w-full bg-transparent outline-none text-base text-[#141313]/80 placeholder:text-[#141313]/20 font-sans pb-2 border-b border-black/10 focus:border-[#141313] transition-colors"
+                  className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 outline-none text-base text-[#141313]/80 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors"
                 />
               </div>
 
@@ -518,7 +545,7 @@ export default function ImpulseShieldPage() {
                     placeholder={t.vault.pricePlaceholder}
                     value={itemPrice}
                     onChange={e => setItemPrice(e.target.value)}
-                    className="w-32 bg-transparent outline-none text-sm text-[#141313]/70 placeholder:text-[#141313]/20 font-mono pb-2 border-b border-black/10 focus:border-[#141313] transition-colors"
+                    className="w-32 bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 outline-none text-sm text-[#141313]/70 placeholder:text-[#141313]/40 font-mono focus:border-slate-400 transition-colors"
                   />
                 </div>
 
@@ -542,7 +569,7 @@ export default function ImpulseShieldPage() {
 
               {/* Stress level */}
               <div>
-                <p className="text-[9px] font-mono tracking-[0.3em] text-[#141313]/35 uppercase mb-4">
+                <p className="text-[9px] font-mono tracking-[0.3em] text-[#141313]/60 uppercase mb-4">
                   {t.vault.stressLabel}
                 </p>
                 <div className="flex items-center gap-5">
@@ -576,7 +603,7 @@ export default function ImpulseShieldPage() {
                 value={itemReflection}
                 onChange={e => setItemReflection(e.target.value)}
                 rows={2}
-                className="w-full bg-transparent outline-none resize-none text-sm text-[#141313]/60 placeholder:text-[#141313]/15 font-sans py-2 border-b border-black/8 focus:border-black/20 transition-colors leading-relaxed"
+                className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 outline-none resize-none text-sm text-[#141313]/60 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors leading-relaxed"
               />
 
               <button
@@ -584,7 +611,7 @@ export default function ImpulseShieldPage() {
                 disabled={!itemName.trim()}
                 className={`px-10 py-3.5 rounded-full text-[9px] font-mono font-bold tracking-[0.4em] uppercase transition-all duration-200 ${
                   itemName.trim()
-                    ? 'bg-[#141313] text-[#F9F9F9] hover:bg-[#1A2421]'
+                    ? 'bg-emerald-700 text-white hover:bg-emerald-800'
                     : 'bg-black/5 text-[#141313]/20 cursor-not-allowed'
                 }`}
               >
@@ -607,10 +634,10 @@ export default function ImpulseShieldPage() {
                 const pct = Math.max(0, Math.min(100, ((VAULT_DURATION - msLeft) / VAULT_DURATION) * 100));
 
                 return (
-                  <div key={item.id} className="py-5 border-b border-black/6 group">
+                  <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3 group">
                     <div className="flex items-start gap-4">
                       {/* Category icon */}
-                      <span className="text-base text-[#141313]/20 shrink-0 mt-0.5">{CATEGORY_ICONS[item.category]}</span>
+                      <span className="text-base text-[#141313]/30 shrink-0 mt-0.5">{CATEGORY_ICONS[item.category]}</span>
 
                       <div className="flex-1 min-w-0">
                         {/* Name + status */}
@@ -714,7 +741,7 @@ export default function ImpulseShieldPage() {
         <section className="space-y-10">
           <div>
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">{t.tracker.title}</h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest max-w-lg">{t.tracker.subtitle}</p>
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest max-w-lg">{t.tracker.subtitle}</p>
           </div>
 
           {/* Log form */}
@@ -724,7 +751,7 @@ export default function ImpulseShieldPage() {
               placeholder={t.tracker.triggerPlaceholder}
               value={trigger}
               onChange={e => setTrigger(e.target.value)}
-              className="w-full bg-transparent outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 font-sans pb-2 border-b border-black/10 focus:border-[#141313] transition-colors"
+              className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors"
             />
 
             {/* Stress level */}
@@ -753,16 +780,20 @@ export default function ImpulseShieldPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setLogResisted(true)}
-                className={`px-5 py-2 rounded-full text-[8px] font-mono tracking-widest uppercase transition-all duration-200 border ${
-                  logResisted ? 'border-[#2D6A4F]/40 text-[#2D6A4F]/70 bg-[#2D6A4F]/5' : 'border-black/8 text-[#141313]/30'
+                className={`px-5 py-2 rounded-xl text-[8px] font-mono tracking-widest uppercase transition-all duration-200 border ${
+                  logResisted
+                    ? 'border-emerald-200 text-emerald-700 bg-emerald-50'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
                 }`}
               >
                 ✓ {t.tracker.resisted}
               </button>
               <button
                 onClick={() => setLogResisted(false)}
-                className={`px-5 py-2 rounded-full text-[8px] font-mono tracking-widest uppercase transition-all duration-200 border ${
-                  !logResisted ? 'border-[#FF8A80]/40 text-[#FF8A80]/70 bg-[#FF8A80]/5' : 'border-black/8 text-[#141313]/30'
+                className={`px-5 py-2 rounded-xl text-[8px] font-mono tracking-widest uppercase transition-all duration-200 border ${
+                  !logResisted
+                    ? 'border-rose-200 text-rose-700 bg-rose-50'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
                 }`}
               >
                 × {t.tracker.notResisted}
@@ -774,14 +805,14 @@ export default function ImpulseShieldPage() {
               value={logNote}
               onChange={e => setLogNote(e.target.value)}
               rows={2}
-              className="w-full bg-transparent outline-none resize-none text-sm text-[#141313]/60 placeholder:text-[#141313]/15 font-sans py-2 border-b border-black/8 focus:border-black/20 transition-colors"
+              className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 outline-none resize-none text-sm text-[#141313]/60 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors"
             />
 
             <button
               onClick={logImpulse}
               disabled={!trigger.trim()}
               className={`px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.4em] uppercase transition-all duration-200 ${
-                trigger.trim() ? 'bg-[#141313] text-[#F9F9F9] hover:bg-[#1A2421]' : 'bg-black/5 text-[#141313]/20 cursor-not-allowed'
+                trigger.trim() ? 'bg-emerald-700 text-white hover:bg-emerald-800' : 'bg-black/5 text-[#141313]/20 cursor-not-allowed'
               }`}
             >
               {t.tracker.log}
@@ -790,7 +821,7 @@ export default function ImpulseShieldPage() {
 
           {/* History */}
           <div>
-            <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/25 uppercase block mb-5">
+            <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/60 uppercase block mb-5">
               {t.tracker.history}
             </span>
             {impulseLog.length === 0 ? (
@@ -798,30 +829,76 @@ export default function ImpulseShieldPage() {
             ) : (
               <div className="space-y-0">
                 {impulseLog.map((log) => (
-                  <div key={log.id} className="flex items-start gap-4 py-4 border-b border-black/5">
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                      style={{ backgroundColor: log.resisted ? '#2D6A4F' : '#FF8A80', opacity: 0.6 }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-sans text-[#141313]/70 mb-1">{log.trigger}</p>
-                      {log.note && <p className="text-[9px] font-sans italic text-[#141313]/30 mb-1">"{log.note}"</p>}
-                      <div className="flex items-center gap-3">
-                        <span className="text-[7px] font-mono tracking-widest text-[#141313]/20">
-                          {new Date(log.timestamp).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
-                        <span
-                          className="text-[7px] font-mono tracking-widest"
-                          style={{ color: log.resisted ? '#2D6A4F' : '#FF8A80', opacity: 0.7 }}
-                        >
-                          {log.resisted ? t.tracker.resistedTag : t.tracker.notResistedTag}
-                        </span>
+                  <div key={log.id} className="group bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-row items-center justify-between p-4 mb-3">
+                    {editingLogId === log.id ? (
+                      <div className="flex-1 space-y-3">
+                        <input
+                          value={editLogTrigger}
+                          onChange={e => setEditLogTrigger(e.target.value)}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                          placeholder={t.tracker.triggerPlaceholder}
+                        />
+                        <input
+                          value={editLogNote}
+                          onChange={e => setEditLogNote(e.target.value)}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                          placeholder={t.tracker.notePlaceholder}
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={() => saveEditImpulseLog(log.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
+                            {language === 'id' ? 'SIMPAN' : 'SAVE'}
+                          </button>
+                          <button onClick={() => setEditingLogId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
+                            {language === 'id' ? 'BATAL' : 'CANCEL'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-[8px] font-mono shrink-0 mt-0.5" style={{ color: STRESS_COLORS[log.stressLevel], opacity: 0.7 }}>
-                      {log.stressLevel}/5
-                    </span>
+                    ) : (
+                      <>
+                        <div className="flex-1 pr-4 flex items-start gap-4">
+                          <div
+                            className="w-2 h-2 rounded-full shrink-0 mt-1.5"
+                            style={{ backgroundColor: log.resisted ? '#2D6A4F' : '#FF8A80', opacity: 0.8 }}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-sans text-[#141313]/70 mb-1">{log.trigger}</p>
+                            {log.note && <p className="text-[9px] font-sans italic text-[#141313]/50 mb-1">"{log.note}"</p>}
+                            <div className="flex items-center gap-3">
+                              <span className="text-[7px] font-mono tracking-widest text-[#141313]/40">
+                                {new Date(log.timestamp).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
+                              <span
+                                className="text-[7px] font-mono tracking-widest"
+                                style={{ color: log.resisted ? '#2D6A4F' : '#FF8A80', opacity: 0.9 }}
+                              >
+                                {log.resisted ? t.tracker.resistedTag : t.tracker.notResistedTag}
+                              </span>
+                              <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
+                              <span className="text-[8px] font-mono" style={{ color: STRESS_COLORS[log.stressLevel], opacity: 0.9 }}>
+                                {log.stressLevel}/5
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0 m-0">
+                          <button
+                            onClick={() => { setEditingLogId(log.id); setEditLogTrigger(log.trigger); setEditLogNote(log.note || ''); }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                            title="Edit"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => deleteImpulseLog(log.id)}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            title="Delete"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -837,7 +914,7 @@ export default function ImpulseShieldPage() {
         <section className="space-y-10">
           <div>
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">{t.patterns.title}</h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest">{t.patterns.subtitle}</p>
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest">{t.patterns.subtitle}</p>
           </div>
 
           {totalImpulses === 0 ? (
@@ -854,10 +931,10 @@ export default function ImpulseShieldPage() {
                   { value: avgStress, label: t.patterns.avgStress },
                 ].map((s, i) => (
                   <div key={i}>
-                    <span className="block text-3xl font-extrabold tracking-tighter text-[#141313]/15 leading-none mb-1">
+                    <span className="block text-3xl font-extrabold tracking-tighter text-slate-800 leading-none mb-1">
                       {s.value}
                     </span>
-                    <span className="text-[8px] font-mono tracking-widest text-[#141313]/30 uppercase">{s.label}</span>
+                    <span className="text-[8px] font-mono tracking-widest text-[#141313]/60 uppercase">{s.label}</span>
                   </div>
                 ))}
               </div>
@@ -873,8 +950,8 @@ export default function ImpulseShieldPage() {
               )}
 
               {/* Stress distribution chart */}
-              <div>
-                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/25 uppercase block mb-5">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/60 uppercase block mb-5">
                   {t.patterns.stressChart}
                 </span>
                 <div className="flex items-end gap-4 h-20">
@@ -884,12 +961,12 @@ export default function ImpulseShieldPage() {
                     const h = maxCount > 0 ? (count / maxCount) * 64 : 0;
                     return (
                       <div key={lv} className="flex flex-col items-center gap-1.5 flex-1">
-                        <span className="text-[8px] font-mono text-[#141313]/30">{count}</span>
+                        <span className="text-[8px] font-mono text-[#141313]/50">{count}</span>
                         <div
                           className="w-full rounded-sm transition-all duration-500"
-                          style={{ height: `${h}px`, backgroundColor: STRESS_COLORS[lv], opacity: 0.4 }}
+                          style={{ height: `${h}px`, backgroundColor: STRESS_COLORS[lv], opacity: 0.6 }}
                         />
-                        <span className="text-[7px] font-mono text-[#141313]/20">{lv}</span>
+                        <span className="text-[7px] font-mono text-[#141313]/50">{lv}</span>
                       </div>
                     );
                   })}
@@ -912,8 +989,8 @@ export default function ImpulseShieldPage() {
               {/* Resist rate bar */}
               <div className="pt-2">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[8px] font-mono text-[#141313]/25 tracking-widest uppercase">{t.patterns.resistRate}</span>
-                  <span className="text-[9px] font-mono font-bold text-[#141313]/40">{resistRate}%</span>
+                  <span className="text-[8px] font-mono text-[#141313]/60 tracking-widest uppercase">{t.patterns.resistRate}</span>
+                  <span className="text-[9px] font-mono font-bold text-slate-800">{resistRate}%</span>
                 </div>
                 <div className="h-[3px] bg-black/5 rounded-full overflow-hidden">
                   <div
@@ -938,7 +1015,7 @@ export default function ImpulseShieldPage() {
         <section className="space-y-10">
           <div>
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">{t.rules.title}</h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest max-w-lg">{t.rules.subtitle}</p>
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest max-w-lg">{t.rules.subtitle}</p>
           </div>
 
           {/* Add rule */}
@@ -949,13 +1026,13 @@ export default function ImpulseShieldPage() {
               value={newRule}
               onChange={e => setNewRule(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addRule()}
-              className="flex-1 bg-transparent outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 font-sans pb-2 border-b border-black/10 focus:border-[#141313] transition-colors"
+              className="flex-1 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors"
             />
             <button
               onClick={addRule}
               disabled={!newRule.trim()}
-              className={`text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-colors mb-2 ${
-                newRule.trim() ? 'text-[#141313] hover:text-[#2D6A4F]' : 'text-[#141313]/15 cursor-not-allowed'
+              className={`px-5 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-colors ${
+                newRule.trim() ? 'bg-emerald-700 text-white hover:bg-emerald-800' : 'bg-gray-100 text-[#141313]/20 cursor-not-allowed'
               }`}
             >
               + {t.rules.add}
@@ -968,27 +1045,57 @@ export default function ImpulseShieldPage() {
           ) : (
             <div className="space-y-0">
               {rules.map((rule, i) => (
-                <div key={rule.id} className="flex items-start gap-4 py-4 border-b border-black/5 group">
-                  {/* Toggle */}
-                  <button
-                    onClick={() => toggleRule(rule.id)}
-                    className={`w-3.5 h-3.5 rounded-full border mt-0.5 shrink-0 transition-all duration-200 ${
-                      rule.active ? 'bg-[#141313]/50 border-[#141313]/50' : 'border-black/15 hover:border-black/30'
-                    }`}
-                  />
-                  {/* Text */}
-                  <p className={`flex-1 text-[11px] font-sans leading-relaxed transition-colors ${
-                    rule.active ? 'text-[#141313]/70' : 'text-[#141313]/25 line-through'
-                  }`}>
-                    {rule.text}
-                  </p>
-                  {/* Delete */}
-                  <button
-                    onClick={() => deleteRule(rule.id)}
-                    className="text-[8px] font-mono text-[#141313]/10 hover:text-[#FF8A80]/50 transition-colors opacity-0 group-hover:opacity-100 shrink-0 mt-0.5"
-                  >
-                    ×
-                  </button>
+                <div key={rule.id} className="group bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-row items-center justify-between p-4 mb-3">
+                  {editingRuleId === rule.id ? (
+                    <div className="flex-1 space-y-2">
+                      <input
+                        value={editRuleText}
+                        onChange={e => setEditRuleText(e.target.value)}
+                        className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400"
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEditRule(rule.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
+                          {language === 'id' ? 'SIMPAN' : 'SAVE'}
+                        </button>
+                        <button onClick={() => setEditingRuleId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
+                          {language === 'id' ? 'BATAL' : 'CANCEL'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex-1 pr-4 flex items-start gap-3">
+                        {/* Toggle */}
+                        <button
+                          onClick={() => toggleRule(rule.id)}
+                          className={`w-3.5 h-3.5 rounded-full border mt-0.5 shrink-0 transition-all duration-200 ${
+                            rule.active ? 'bg-emerald-700 border-emerald-700' : 'border-gray-300 hover:border-gray-500'
+                          }`}
+                        />
+                        <p className={`flex-1 text-[11px] font-sans leading-relaxed transition-colors ${
+                          rule.active ? 'text-[#141313]/70' : 'text-[#141313]/30 line-through'
+                        }`}>
+                          {rule.text}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2 shrink-0 m-0">
+                        <button
+                          onClick={() => { setEditingRuleId(rule.id); setEditRuleText(rule.text); }}
+                          className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                          title="Edit"
+                        >
+                          ✎
+                        </button>
+                        <button
+                          onClick={() => deleteRule(rule.id)}
+                          className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                          title="Delete"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
@@ -997,7 +1104,7 @@ export default function ImpulseShieldPage() {
           {/* Rule count */}
           {rules.length > 0 && (
             <div className="flex items-center gap-3 pt-2">
-              <span className="text-[8px] font-mono text-[#141313]/20 tracking-widest">
+              <span className="text-[8px] font-mono text-[#141313]/50 tracking-widest">
                 {rules.filter(r => r.active).length} / {rules.length} {language === 'id' ? 'aturan aktif' : 'rules active'}
               </span>
             </div>

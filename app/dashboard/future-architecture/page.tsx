@@ -801,6 +801,8 @@ export default function FutureArchitecturePage() {
   const [newCat, setNewCat] = useState(0);
   const [manifesto, setManifesto] = useState("");
   const [manifestoSaved, setManifestoSaved] = useState(false);
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editGoalText, setEditGoalText] = useState("");
 
   // Parallax
   useEffect(() => {
@@ -905,6 +907,14 @@ export default function FutureArchitecturePage() {
     localStorage.setItem("fa2_goals", JSON.stringify(u));
   };
 
+  const saveEditGoal = (id: string) => {
+    if (!editGoalText.trim()) return;
+    const u = goals.map((g) => g.id === id ? { ...g, text: editGoalText } : g);
+    setGoals(u);
+    localStorage.setItem("fa2_goals", JSON.stringify(u));
+    setEditingGoalId(null);
+  };
+
   const saveManifesto = () => {
     localStorage.setItem("fa2_manifesto", manifesto);
     setManifestoSaved(true);
@@ -936,15 +946,15 @@ export default function FutureArchitecturePage() {
             transition: "transform 0.12s ease-out",
           }}
         >
-          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-[#141313]">
+          <h1 className="text-[4.5rem] md:text-[6.5rem] font-extrabold tracking-[-0.05em] leading-[0.85] text-slate-900">
             {t.headline1}
             <br />
-            <span className="font-serif italic font-normal text-[#1A2421]">
+            <span className="font-serif italic font-normal text-emerald-700">
               {t.headline2}
             </span>
           </h1>
         </div>
-        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/40 uppercase">
+        <p className="mt-5 text-[11px] font-mono tracking-[0.2em] text-[#141313]/60 uppercase">
           {t.subtitle}
         </p>
         <div className="mt-7 flex items-center gap-4">
@@ -957,15 +967,15 @@ export default function FutureArchitecturePage() {
       </section>
 
       {/* ── TABS ── */}
-      <div className="flex gap-0 border-b border-black/8">
+      <div className="flex bg-gray-100/50 p-1 rounded-full gap-1 w-fit">
         {(["pathfinder", "roadmap", "blueprint"] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 border-b-2 -mb-px ${
+            className={`text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-full ${
               activeTab === tab
-                ? "border-[#141313] text-[#141313]"
-                : "border-transparent text-[#141313]/30 hover:text-[#141313]/60"
+                ? "bg-white rounded-full shadow-sm text-emerald-800 font-medium px-6 py-2"
+                : "text-gray-500 hover:text-emerald-700 px-6 py-2 rounded-full transition-colors"
             }`}
           >
             {t.tabs[tab]}
@@ -1147,7 +1157,7 @@ export default function FutureArchitecturePage() {
                     {canAnalyze && (
                       <button
                         onClick={handleAnalyze}
-                        className="text-[8px] font-mono tracking-[0.25em] uppercase text-[#141313]/30 hover:text-[#141313] transition-colors shrink-0 border border-black/8 px-4 py-2 rounded-full hover:border-black/20"
+                        className="text-[8px] font-mono tracking-[0.25em] uppercase text-emerald-700/60 hover:text-emerald-800 transition-colors shrink-0 border border-emerald-200 px-4 py-2 rounded-full hover:border-emerald-400 hover:bg-emerald-50"
                       >
                         {language === "id" ? "LIHAT HASIL →" : "SEE RESULTS →"}
                       </button>
@@ -1170,7 +1180,7 @@ export default function FutureArchitecturePage() {
                     </p>
 
                     {/* Scenario */}
-                    <p className="text-[11px] font-sans italic text-[#141313]/40 leading-relaxed mb-10 max-w-lg">
+                    <p className="text-[11px] font-sans italic text-slate-800/60 leading-relaxed mb-10 max-w-lg">
                       {scenario}
                     </p>
 
@@ -1190,10 +1200,10 @@ export default function FutureArchitecturePage() {
                                 }
                               }, 400);
                             }}
-                            className={`relative flex flex-col items-center gap-3 py-8 px-4 rounded-[12px] border-2 transition-all duration-300 group ${
+                            className={`relative flex flex-col items-center gap-3 py-8 px-4 rounded-2xl border-2 transition-all duration-300 group ${
                               isSelected
-                                ? "border-[#141313] bg-[#141313] text-[#F9F9F9] scale-[1.02]"
-                                : "border-black/6 bg-white/60 text-[#141313] hover:border-black/15 hover:bg-white hover:scale-[1.01]"
+                                ? "border-emerald-600 bg-emerald-50 text-emerald-800 scale-[1.02] shadow-sm"
+                                : "border-gray-200 bg-white/50 text-gray-500 shadow-sm hover:bg-white hover:scale-[1.01]"
                             }`}
                           >
                             {/* Level indicator */}
@@ -1211,8 +1221,8 @@ export default function FutureArchitecturePage() {
                             <span
                               className={`text-[10px] font-mono font-bold tracking-[0.25em] uppercase transition-colors ${
                                 isSelected
-                                  ? "text-[#F9F9F9]"
-                                  : "text-[#141313]/50 group-hover:text-[#141313]"
+                                  ? "text-emerald-800"
+                                  : "text-gray-500 group-hover:text-gray-700"
                               }`}
                             >
                               {lvls[lv]}
@@ -1220,8 +1230,8 @@ export default function FutureArchitecturePage() {
 
                             {/* Selected check */}
                             {isSelected && (
-                              <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-[#F9F9F9]/20 flex items-center justify-center">
-                                <span className="text-[8px] text-[#F9F9F9]">
+                              <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <span className="text-[8px] text-emerald-700">
                                   ✓
                                 </span>
                               </div>
@@ -1233,14 +1243,14 @@ export default function FutureArchitecturePage() {
                   </div>
 
                   {/* ── NAVIGATION ── */}
-                  <div className="flex items-center justify-between pt-6 border-t border-black/5">
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-800/10">
                     <button
                       onClick={() => setQuizStep(Math.max(0, quizStep - 1))}
                       disabled={quizStep === 0}
                       className={`text-[9px] font-mono tracking-[0.3em] uppercase transition-colors ${
                         quizStep === 0
-                          ? "text-[#141313]/15 cursor-not-allowed"
-                          : "text-[#141313]/40 hover:text-[#141313]"
+                          ? "text-emerald-800/20 cursor-not-allowed"
+                          : "text-emerald-800/60 hover:text-emerald-900"
                       }`}
                     >
                       ← {language === "id" ? "SEBELUMNYA" : "PREVIOUS"}
@@ -1257,10 +1267,10 @@ export default function FutureArchitecturePage() {
                             onClick={() => setQuizStep(i)}
                             className={`rounded-full transition-all duration-200 ${
                               isCurrent
-                                ? "w-5 h-1.5 bg-[#141313]"
+                                ? "w-5 h-1.5 bg-emerald-700"
                                 : answered
-                                  ? "w-1.5 h-1.5 bg-[#141313]/30 hover:bg-[#141313]/50"
-                                  : "w-1.5 h-1.5 bg-black/8 hover:bg-black/15"
+                                  ? "w-1.5 h-1.5 bg-emerald-700/40 hover:bg-emerald-700/60"
+                                  : "w-1.5 h-1.5 bg-emerald-700/10 hover:bg-emerald-700/20"
                             }`}
                           />
                         );
@@ -1270,7 +1280,7 @@ export default function FutureArchitecturePage() {
                     {quizStep < 17 ? (
                       <button
                         onClick={() => setQuizStep(quizStep + 1)}
-                        className="text-[9px] font-mono tracking-[0.3em] uppercase text-[#141313]/40 hover:text-[#141313] transition-colors"
+                        className="text-[9px] font-mono tracking-[0.3em] uppercase text-emerald-700/60 hover:text-emerald-800 transition-colors"
                       >
                         {language === "id" ? "SELANJUTNYA" : "NEXT"} →
                       </button>
@@ -1280,8 +1290,8 @@ export default function FutureArchitecturePage() {
                         disabled={!canAnalyze}
                         className={`px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.4em] uppercase transition-all duration-300 ${
                           canAnalyze
-                            ? "bg-[#141313] text-[#F9F9F9] hover:bg-[#1A2421]"
-                            : "bg-black/5 text-[#141313]/20 cursor-not-allowed"
+                            ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                            : "bg-emerald-50 text-emerald-800/30 cursor-not-allowed"
                         }`}
                       >
                         {t.pathfinder.analyze}
@@ -1291,16 +1301,16 @@ export default function FutureArchitecturePage() {
 
                   {/* ── ANSWERED OVERVIEW ── */}
                   {filledCount > 0 && (
-                    <div className="mt-8 pt-6 border-t border-black/5">
+                    <div className="mt-8 pt-6 border-t border-slate-800/10">
                       <div className="flex items-center gap-3 mb-4">
-                        <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/20 uppercase">
+                        <span className="text-[8px] font-mono tracking-[0.4em] text-slate-800/30 uppercase">
                           {language === "id" ? "DIJAWAB" : "ANSWERED"}
                         </span>
-                        <span className="text-[9px] font-mono text-[#141313]/30">
+                        <span className="text-[9px] font-mono text-slate-800/40">
                           {filledCount}/18
                         </span>
                         {!canAnalyze && (
-                          <span className="text-[8px] font-mono text-[#141313]/20 italic">
+                          <span className="text-[8px] font-mono text-slate-800/30 italic">
                             —{" "}
                             {language === "id"
                               ? `${9 - filledCount} lagi untuk hasil`
@@ -1318,10 +1328,10 @@ export default function FutureArchitecturePage() {
                             <button
                               key={s.id}
                               onClick={() => setQuizStep(i)}
-                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[7px] font-mono tracking-wider transition-all duration-200 ${
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[7px] font-mono tracking-wider transition-all duration-200 ${
                                 i === quizStep
-                                  ? "bg-[#141313] text-[#F9F9F9]"
-                                  : "border border-black/8 text-[#141313]/40 hover:border-black/20"
+                                  ? "bg-emerald-700 text-white"
+                                  : "border border-emerald-700/10 text-emerald-800/60 hover:border-emerald-700/25"
                               }`}
                             >
                               <span>{CHOICE_EMOJIS[ans]}</span>
@@ -1358,13 +1368,13 @@ export default function FutureArchitecturePage() {
             /* ── RESULTS — dramatic reveal ── */
             <div className="space-y-8">
               <div className="mb-2">
-                <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/25 uppercase block mb-3">
+                <span className="text-[8px] font-mono tracking-[0.4em] text-slate-800/40 uppercase block mb-3">
                   {language === "id" ? "ANALISIS SELESAI" : "ANALYSIS COMPLETE"}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#141313] leading-tight mb-2">
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800 leading-tight mb-2">
                   {t.pathfinder.resultTitle}
                 </h2>
-                <p className="text-[10px] font-mono text-[#141313]/35 tracking-widest">
+                <p className="text-[10px] font-mono text-slate-800/60 tracking-widest">
                   {t.pathfinder.resultSub}
                 </p>
               </div>
@@ -1386,10 +1396,10 @@ export default function FutureArchitecturePage() {
                         onClick={() =>
                           setExpandedDomain(isExpanded ? null : domain)
                         }
-                        className={`w-full text-left rounded-[16px] transition-all duration-300 group ${
+                        className={`w-full text-left rounded-2xl transition-all duration-300 group ${
                           isTop
-                            ? "bg-[#141313] text-[#F9F9F9] p-7"
-                            : "border border-black/8 hover:border-black/15 p-6"
+                            ? "bg-emerald-800 text-white p-7"
+                            : "bg-white border border-slate-800/10 shadow-sm hover:shadow-md p-6"
                         }`}
                       >
                         <div className="flex items-start gap-5">
@@ -1568,7 +1578,7 @@ export default function FutureArchitecturePage() {
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">
               {t.roadmap.title}
             </h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest">
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest">
               {t.roadmap.subtitle}
             </p>
           </div>
@@ -1583,8 +1593,8 @@ export default function FutureArchitecturePage() {
                 }
                 className={`flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-mono font-bold tracking-widest uppercase transition-all duration-200 ${
                   selectedDomain === d.id
-                    ? "bg-[#141313] text-[#F9F9F9]"
-                    : "border border-black/10 text-[#141313]/50 hover:border-black/25 hover:text-[#141313]"
+                    ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
+                    : "bg-white border border-gray-200 shadow-sm text-gray-700 hover:border-gray-300 hover:shadow-md"
                 }`}
               >
                 <span className="text-xs">{d.icon}</span>
@@ -1600,7 +1610,7 @@ export default function FutureArchitecturePage() {
                 <div key={pi}>
                   {/* Phase header */}
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-[8px] font-mono tracking-[0.35em] text-[#141313]/30 uppercase">
+                    <span className="text-[8px] font-mono tracking-[0.35em] text-[#141313]/60 uppercase">
                       {t.roadmap.phase} {pi + 1}
                     </span>
                     <span className="text-xs font-bold text-[#141313]">
@@ -1620,8 +1630,8 @@ export default function FutureArchitecturePage() {
                             onClick={() => toggleStep(key)}
                             className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-all duration-200 ${
                               done
-                                ? "bg-[#141313] border-[#141313]"
-                                : "border-black/15 hover:border-black/35"
+                                ? "bg-emerald-600 border-emerald-600"
+                                : "border-gray-300 hover:border-emerald-400"
                             }`}
                           >
                             {done && (
@@ -1666,7 +1676,7 @@ export default function FutureArchitecturePage() {
                   <div className="pt-4 flex items-center gap-4">
                     <div className="flex-1 h-px bg-black/5 overflow-hidden rounded-full">
                       <div
-                        className="h-full bg-[#141313]/30 transition-all duration-700 rounded-full"
+                        className="h-full bg-emerald-600/40 transition-all duration-700 rounded-full"
                         style={{ width: `${(done / allKeys.length) * 100}%` }}
                       />
                     </div>
@@ -1678,7 +1688,7 @@ export default function FutureArchitecturePage() {
               })()}
             </div>
           ) : (
-            <p className="text-[10px] font-mono text-[#141313]/25 tracking-widest italic">
+            <p className="text-[10px] font-mono text-[#141313]/50 tracking-widest italic">
               {t.roadmap.selectPrompt}
             </p>
           )}
@@ -1695,7 +1705,7 @@ export default function FutureArchitecturePage() {
             <h2 className="text-sm font-bold tracking-tight text-[#141313] mb-1">
               {t.blueprint.title}
             </h2>
-            <p className="text-[10px] font-mono text-[#141313]/40 tracking-widest mb-8">
+            <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest mb-8">
               {t.blueprint.subtitle}
             </p>
 
@@ -1708,13 +1718,13 @@ export default function FutureArchitecturePage() {
                   value={newGoal}
                   onChange={(e) => setNewGoal(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addGoal()}
-                  className="w-full bg-transparent outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/20 font-sans pb-1 border-b border-black/10 focus:border-[#141313] transition-colors"
+                  className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2 outline-none text-sm text-[#141313]/80 placeholder:text-[#141313]/40 font-sans focus:border-slate-400 transition-colors"
                 />
               </div>
               <select
                 value={newYear}
                 onChange={(e) => setNewYear(Number(e.target.value))}
-                className="bg-transparent text-[9px] font-mono text-[#141313]/40 outline-none border-b border-black/10 py-1 px-1"
+                className="bg-white border border-gray-200 shadow-sm rounded-xl text-[9px] font-mono text-gray-600 outline-none px-3 py-2 cursor-pointer focus:border-slate-400 transition-colors"
               >
                 {[0, 1, 2, 3, 4].map((o) => {
                   const y = new Date().getFullYear() + o;
@@ -1728,7 +1738,7 @@ export default function FutureArchitecturePage() {
               <select
                 value={newQ}
                 onChange={(e) => setNewQ(e.target.value)}
-                className="bg-transparent text-[9px] font-mono text-[#141313]/40 outline-none border-b border-black/10 py-1 px-1"
+                className="bg-white border border-gray-200 shadow-sm rounded-xl text-[9px] font-mono text-gray-600 outline-none px-3 py-2 cursor-pointer focus:border-slate-400 transition-colors"
               >
                 {["Q1", "Q2", "Q3", "Q4"].map((q) => (
                   <option key={q} value={q}>
@@ -1739,7 +1749,7 @@ export default function FutureArchitecturePage() {
               <select
                 value={newCat}
                 onChange={(e) => setNewCat(Number(e.target.value))}
-                className="bg-transparent text-[9px] font-mono text-[#141313]/40 outline-none border-b border-black/10 py-1 px-1"
+                className="bg-white border border-gray-200 shadow-sm rounded-xl text-[9px] font-mono text-gray-600 outline-none px-3 py-2 cursor-pointer focus:border-slate-400 transition-colors"
               >
                 {t.blueprint.categories.map((c, i) => (
                   <option key={i} value={i}>
@@ -1750,10 +1760,10 @@ export default function FutureArchitecturePage() {
               <button
                 onClick={addGoal}
                 disabled={!newGoal.trim()}
-                className={`text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-colors ${
+                className={`px-6 py-2 rounded-full text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-colors ${
                   newGoal.trim()
-                    ? "text-[#141313] hover:text-[#2D6A4F]"
-                    : "text-[#141313]/20 cursor-not-allowed"
+                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                    : "bg-gray-100 text-[#141313]/20 cursor-not-allowed"
                 }`}
               >
                 + {t.blueprint.add}
@@ -1762,11 +1772,11 @@ export default function FutureArchitecturePage() {
 
             {/* Goals list — timeline style */}
             {goals.length === 0 ? (
-              <p className="text-[10px] font-mono text-[#141313]/25 italic">
+              <p className="text-[10px] font-mono text-[#141313]/50 italic">
                 {t.blueprint.noGoals}
               </p>
             ) : (
-              <div className="space-y-0">
+              <div className="space-y-3">
                 {[...goals]
                   .sort(
                     (a, b) =>
@@ -1775,46 +1785,76 @@ export default function FutureArchitecturePage() {
                   .map((g, i, arr) => {
                     const showHeader = i === 0 || g.year !== arr[i - 1].year;
                     return (
-                      <div key={g.id}>
+                      <div key={g.id} className="space-y-3">
                         {showHeader && (
-                          <div className="flex items-center gap-3 pt-4 pb-3">
+                          <div className="flex items-center gap-3 pt-4 pb-1">
                             <span className="text-[8px] font-mono font-bold tracking-[0.4em] text-[#141313]/25 uppercase">
                               {g.year}
                             </span>
                             <div className="h-px flex-1 bg-black/5" />
                           </div>
                         )}
-                        <div className="flex items-start gap-4 py-3 border-b border-black/5 group">
+                        <div className="group bg-white shadow-sm ring-1 ring-gray-100 hover:shadow-md transition-all flex flex-row items-center justify-between p-4 rounded-2xl gap-4">
                           <button
                             onClick={() => toggleGoal(g.id)}
-                            className={`w-3.5 h-3.5 rounded-full border mt-0.5 shrink-0 transition-all duration-200 ${
+                            className={`w-3.5 h-3.5 rounded-full border shrink-0 transition-all duration-200 ${
                               g.done
-                                ? "bg-[#141313]/40 border-[#141313]/40"
-                                : "border-black/15 hover:border-black/35"
+                                ? "bg-emerald-600/60 border-emerald-600/60"
+                                : "border-gray-300 hover:border-emerald-400"
                             }`}
                           />
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className={`text-[11px] font-sans transition-all duration-200 ${g.done ? "line-through text-[#141313]/25" : "text-[#141313]/70"}`}
-                            >
-                              {g.text}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[7px] font-mono tracking-widest text-[#141313]/20">
-                                {g.quarter}
-                              </span>
-                              <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
-                              <span className="text-[7px] font-mono tracking-widest text-[#141313]/20">
-                                {g.category.toUpperCase()}
-                              </span>
-                            </div>
+                          <div className="flex-1 pr-4 min-w-0">
+                            {editingGoalId === g.id ? (
+                              <div className="space-y-2">
+                                <input
+                                  value={editGoalText}
+                                  onChange={e => setEditGoalText(e.target.value)}
+                                  className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                                />
+                                <div className="flex gap-2">
+                                  <button onClick={() => saveEditGoal(g.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
+                                    {language === 'id' ? 'SIMPAN' : 'SAVE'}
+                                  </button>
+                                  <button onClick={() => setEditingGoalId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
+                                    {language === 'id' ? 'BATAL' : 'CANCEL'}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p
+                                  className={`text-[11px] font-sans transition-all duration-200 ${g.done ? "line-through text-[#141313]/25" : "text-[#141313]/70"}`}
+                                >
+                                  {g.text}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-[7px] font-mono tracking-widest text-[#141313]/25 uppercase">
+                                    {g.quarter}
+                                  </span>
+                                  <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
+                                  <span className="text-[7px] font-mono tracking-widest text-[#141313]/25 uppercase">
+                                    {g.category ? g.category.toUpperCase() : 'GENERAL'}
+                                  </span>
+                                </div>
+                              </>
+                            )}
                           </div>
-                          <button
-                            onClick={() => removeGoal(g.id)}
-                            className="text-[9px] text-[#141313]/15 hover:text-[#FF8A80]/60 opacity-0 group-hover:opacity-100 transition-all duration-200 shrink-0"
-                          >
-                            ×
-                          </button>
+                          <div className="flex items-center space-x-2 shrink-0 m-0">
+                            <button
+                              onClick={() => { setEditingGoalId(g.id); setEditGoalText(g.text); }}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              onClick={() => removeGoal(g.id)}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                              title="Delete"
+                            >
+                              ×
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -1826,29 +1866,31 @@ export default function FutureArchitecturePage() {
           {/* ── Manifesto ── */}
           <div className="pt-4 border-t border-black/8 space-y-4">
             <div>
-              <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/30 uppercase block mb-4">
+              <span className="text-[8px] font-mono tracking-[0.4em] text-[#141313]/60 uppercase block mb-4">
                 {t.blueprint.manifesto}
               </span>
-              <div className="text-[5rem] font-serif leading-none text-[#141313]/5 select-none -mb-6">
-                "
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div className="text-[4rem] font-serif leading-none text-[#141313]/10 select-none -mb-4">
+                  "
+                </div>
+                <textarea
+                  value={manifesto}
+                  onChange={(e) => setManifesto(e.target.value)}
+                  placeholder={t.blueprint.manifestoPlaceholder}
+                  rows={4}
+                  className="w-full bg-transparent outline-none resize-none text-base font-serif italic text-[#141313]/75 placeholder:text-[#141313]/40 leading-relaxed focus:outline-none pb-2 transition-colors"
+                />
               </div>
-              <textarea
-                value={manifesto}
-                onChange={(e) => setManifesto(e.target.value)}
-                placeholder={t.blueprint.manifestoPlaceholder}
-                rows={4}
-                className="w-full bg-transparent outline-none resize-none text-base font-serif italic text-[#141313]/75 placeholder:text-[#141313]/15 leading-relaxed border-b border-black/8 focus:border-black/20 pb-2 transition-colors"
-              />
             </div>
             <button
               onClick={saveManifesto}
               disabled={!manifesto.trim()}
-              className={`text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-colors ${
+              className={`px-6 py-2 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 ${
                 manifestoSaved
-                  ? "text-[#2D6A4F]"
+                  ? "bg-emerald-600 text-white"
                   : manifesto.trim()
-                    ? "text-[#141313]/40 hover:text-[#141313]"
-                    : "text-[#141313]/15 cursor-not-allowed"
+                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                    : "bg-gray-100 text-[#141313]/20 cursor-not-allowed"
               }`}
             >
               {manifestoSaved
@@ -1874,10 +1916,10 @@ export default function FutureArchitecturePage() {
               },
             ].map((s, i) => (
               <div key={i}>
-                <span className="block text-3xl font-extrabold tracking-tighter text-[#141313]/15">
+                <span className="block text-3xl font-extrabold tracking-tighter text-slate-800">
                   {s.n}
                 </span>
-                <span className="text-[8px] font-mono tracking-widest text-[#141313]/30 uppercase">
+                <span className="text-[8px] font-mono tracking-widest text-[#141313]/60 uppercase">
                   {s.label}
                 </span>
               </div>
