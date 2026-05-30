@@ -428,7 +428,7 @@ export default function InteractiveCalendar() {
 
   return (
     <section
-      className="w-full pt-12 relative"
+      className="w-full pt-12 relative overflow-x-hidden"
       aria-label="Interactive calendar"
     >
       <div className="flex items-end justify-between mb-8">

@@ -70,13 +70,27 @@ export default function SanctuaryDrawer() {
       setIsAraTyping(false);
       if (timerRef.current) clearInterval(timerRef.current);
 
-      // Force scroll reset
-      if (drawerRef.current) {
-        drawerRef.current.scrollTop = 0;
-      }
-      window.scrollTo(0, 0);
+      // Force scroll reset asynchronously after elements have rendered
+      const timer = setTimeout(() => {
+        if (drawerRef.current) {
+          drawerRef.current.scrollTop = 0;
+        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, 50);
+
+      return () => clearTimeout(timer);
     }
-  }, [selectedDateKey, isOpen]);
+  }, [
+    selectedDateKey,
+    isOpen,
+    setNewTaskText,
+    setExpenseLabel,
+    setExpenseAmount,
+    setTimerActive,
+    setTimerSeconds,
+    setAraText,
+    setIsAraTyping,
+  ]);
 
   // ── Focus timer logic ──
   useEffect(() => {

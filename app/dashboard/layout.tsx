@@ -126,7 +126,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-equil-paper text-equil-onyx relative font-sans overflow-x-hidden">
+    <div className="flex flex-col md:flex-row min-h-screen bg-equil-paper text-equil-onyx relative font-sans overflow-x-hidden w-full max-w-full">
       
       {/* ── MOBILE TOP NAVIGATION BAR ── */}
       <div className="flex items-center justify-between p-4 border-b border-equil-forest/10 md:hidden bg-equil-paper sticky top-0 z-40">
@@ -289,8 +289,8 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col min-w-0">
         <div className="flex-1 bg-equil-paper px-4 sm:px-8 md:px-16 py-12 max-w-[1200px] w-full mx-auto overflow-x-hidden relative">
           {/* Organic Ambient Blobs */}
-          <div className="pointer-events-none fixed top-[15%] right-[5%] w-[500px] h-[500px] rounded-full bg-equil-sage/[0.07] blur-[80px] -z-10" aria-hidden="true" />
-          <div className="pointer-events-none fixed bottom-[10%] left-[30%] w-[400px] h-[400px] rounded-full bg-equil-coral/[0.04] blur-[90px] -z-10" aria-hidden="true" />
+          <div className="pointer-events-none fixed top-[15%] right-[5%] w-[500px] h-[500px] rounded-full bg-equil-sage/[0.07] blur-[80px] -z-10 hidden md:block" aria-hidden="true" />
+          <div className="pointer-events-none fixed bottom-[10%] left-[30%] w-[400px] h-[400px] rounded-full bg-equil-coral/[0.04] blur-[90px] -z-10 hidden md:block" aria-hidden="true" />
 
           {children}
         </div>
