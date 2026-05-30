@@ -56,6 +56,7 @@ export default function SanctuaryDrawer() {
   const [araText, setAraText] = useState('');
   const [isAraTyping, setIsAraTyping] = useState(false);
   const araTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const drawerRef = useRef<HTMLElement>(null);
 
   // ── Reset state when drawer opens for a new date ──
   useEffect(() => {
@@ -68,6 +69,12 @@ export default function SanctuaryDrawer() {
       setAraText('');
       setIsAraTyping(false);
       if (timerRef.current) clearInterval(timerRef.current);
+
+      // Force scroll reset
+      if (drawerRef.current) {
+        drawerRef.current.scrollTop = 0;
+      }
+      window.scrollTo(0, 0);
     }
   }, [selectedDateKey, isOpen]);
 
@@ -170,12 +177,13 @@ export default function SanctuaryDrawer() {
 
           {/* ── DRAWER PANEL ── */}
           <motion.aside
+            ref={drawerRef}
             key="drawer"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-screen w-full md:w-[600px] z-[60] bg-equil-paper shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.08)] overflow-y-auto"
+            className="fixed top-0 right-0 h-screen w-full max-w-full md:w-[600px] z-[60] bg-equil-paper shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.08)] overflow-y-auto overflow-x-hidden"
           >
             <div className="flex flex-col gap-10 px-8 md:px-12 py-10">
 

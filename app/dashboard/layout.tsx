@@ -126,7 +126,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-equil-paper text-equil-onyx relative font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-equil-paper text-equil-onyx relative font-sans overflow-x-hidden">
       
       {/* ── MOBILE TOP NAVIGATION BAR ── */}
       <div className="flex items-center justify-between p-4 border-b border-equil-forest/10 md:hidden bg-equil-paper sticky top-0 z-40">
