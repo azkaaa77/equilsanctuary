@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef } from 'react';
-import Lenis from 'lenis';
-import { motion, AnimatePresence } from 'motion/react';
-import { LanguageProvider } from './language-provider';
-import { CircadianProvider } from './circadian-provider';
-import { AuthProvider } from './auth-provider';
+import React, { useEffect, useRef } from "react";
+import Lenis from "lenis";
+import { motion, AnimatePresence } from "motion/react";
+import { LanguageProvider } from "./language-provider";
+import { CircadianProvider } from "./circadian-provider";
+import { AuthProvider } from "./auth-provider";
 
-import { useAtmosphericSound } from '@/hooks/use-atmospheric-sound';
+import { useAtmosphericSound } from "@/hooks/use-atmospheric-sound";
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = React.useState(false);
@@ -40,7 +40,12 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
     <AuthProvider>
       <LanguageProvider>
         <CircadianProvider>
-          <div style={{ opacity: mounted ? 1 : 0, transition: 'opacity 0.5s ease' }}>
+          <div
+            style={{
+              opacity: mounted ? 1 : 0,
+              transition: "opacity 0.5s ease",
+            }}
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 initial={{ opacity: 0 }}

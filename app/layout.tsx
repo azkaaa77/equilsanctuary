@@ -40,10 +40,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body suppressHydrationWarning className="antialiased">
-        <ClientProviders>
-          <Preloader />
-          {children}
-        </ClientProviders>
+        <Preloader />
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

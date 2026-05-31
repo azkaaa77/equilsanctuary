@@ -62,6 +62,7 @@ function DayCell({
 }) {
   const cellRef = useRef<HTMLDivElement>(null);
   const [glow, setGlow] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
   const isCurrentDay = isToday(date);
   const isSun = isSunday(date);
 
@@ -78,24 +79,30 @@ function DayCell({
     <motion.div
       ref={cellRef}
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={() => currentMonth && onSelect(date)}
-      className={`calendar-cell relative min-h-[70px] md:min-h-[120px] p-1.5 md:p-3 rounded-xl cursor-pointer group overflow-hidden flex flex-col
+      className={`calendar-cell relative min-h-[42px] md:min-h-[50px] p-1 md:p-1.5 rounded-xl cursor-pointer group flex flex-col items-center justify-center
         ${!currentMonth ? "opacity-20 pointer-events-none" : ""}
         ${isCurrentDay ? "bg-equil-mint/[0.08] ring-1 ring-equil-mint/25" : "bg-white/30"}
         border border-equil-forest/[0.04]
       `}
-      whileHover={{ y: -3, scale: 1.02 }}
+      whileHover={{ y: -2, scale: 1.05 }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
-        style={{
-          background: `radial-gradient(circle at ${glow.x}% ${glow.y}%, ${
-            isCurrentDay ? "rgba(45,106,79,0.12)" : "var(--color-equil-sage)"
-          } 0%, transparent 70%)`,
-        }}
-      />
-      <div className="flex items-center justify-between w-full relative z-10">
+      {/* Background glow in its own overflow-hidden div to prevent cutting off tooltips */}
+      <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(circle at ${glow.x}% ${glow.y}%, ${
+              isCurrentDay ? "rgba(45,106,79,0.12)" : "var(--color-equil-sage)"
+            } 0%, transparent 70%)`,
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col items-center justify-center relative z-10">
         <span
           className={`text-xs md:text-sm font-medium tracking-wide ${
             isCurrentDay
@@ -109,38 +116,47 @@ function DayCell({
         </span>
       </div>
 
-      {/* Dot indicator (absolute bottom right) */}
+      {/* Dot indicator (absolute bottom center or bottom right) */}
       {dotStatus !== "none" && currentMonth && (
         <span
-          className={`absolute bottom-1.5 right-1.5 block w-1.5 h-1.5 rounded-full ${DOT_CLASS[dotStatus]} dot-pulse z-20`}
+          className={`absolute bottom-1 block w-1.5 h-1.5 rounded-full ${DOT_CLASS[dotStatus]} dot-pulse z-20`}
         />
       )}
 
-      {/* Micro-text task list inside calendar grid */}
-      {currentMonth && deadlineTasks.length > 0 && (
-        <div className="w-full mt-1.5 space-y-1 relative z-10 flex-1 flex flex-col justify-end">
-          {deadlineTasks.slice(0, 2).map((t) => (
-            <div
-              key={t.id}
-              className={`text-[8px] md:text-[10px] leading-tight truncate w-full text-left px-1 py-0.5 mt-1 rounded-sm font-sans ${
-                t.completed
-                  ? "bg-equil-mint/10 text-equil-mint/80 line-through"
-                  : "bg-equil-coral/10 text-equil-coral"
-              }`}
-              title={t.text}
-            >
-              {t.text}
+      {/* Tooltip on Hover */}
+      <AnimatePresence>
+        {isHovered && currentMonth && deadlineTasks.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute bottom-full mb-2 z-[999] pointer-events-none cursor-default"
+          >
+            <div className="crystal-glass bg-white/95 backdrop-blur-md border border-equil-forest/10 shadow-lg rounded-xl p-2.5 min-w-[150px] max-w-[220px]">
+              <span className="text-[8px] font-mono tracking-wider text-equil-onyx/40 uppercase block mb-1">
+                {format(date, "d MMMM", { locale: language === "id" ? localeID : undefined })}
+              </span>
+              <div className="space-y-1">
+                {deadlineTasks.map((t) => (
+                  <div
+                    key={t.id}
+                    className={`text-[9px] leading-tight truncate px-1.5 py-0.5 rounded-md font-sans ${
+                      t.completed
+                        ? "bg-equil-mint/10 text-equil-mint/80 line-through"
+                        : "bg-equil-coral/10 text-equil-coral"
+                    }`}
+                  >
+                    {t.text}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-          {deadlineTasks.length > 2 && (
-            <div className="text-[7px] md:text-[9px] leading-tight text-equil-forest/50 italic text-left px-0.5 mt-0.5 w-full truncate">
-              {language === "id"
-                ? `+ ${deadlineTasks.length - 2} tugas`
-                : `+ ${deadlineTasks.length - 2} tasks`}
-            </div>
-          )}
-        </div>
-      )}
+            {/* Tooltip arrow */}
+            <div className="w-1.5 h-1.5 bg-white border-r border-b border-equil-forest/10 rotate-45 mx-auto -mt-[3px]" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -428,69 +444,41 @@ export default function InteractiveCalendar() {
 
   return (
     <section
-      className="w-full pt-12 relative overflow-x-hidden"
+      className="w-full relative"
       aria-label="Interactive calendar"
     >
-      <div className="flex items-end justify-between mb-8">
+      <div className="flex items-end justify-between mb-6">
         <div>
-          <span className="text-[9px] font-mono tracking-[0.3em] text-equil-onyx/25 uppercase block mb-2">
+          <span className="text-[9px] font-mono tracking-[0.3em] text-equil-onyx/25 uppercase block mb-1">
             02 // {language === "id" ? "PEMANTAUAN TUGAS" : "TASK MONITORING"}
           </span>
-          <h3 className="text-3xl font-display font-black tracking-tightest text-equil-onyx leading-[0.9]">
-            {language === "id" ? "Jadwal &" : "Schedule &"}
-            <br />
+          <h3 className="text-xl md:text-2xl font-display font-black tracking-tightest text-equil-onyx leading-none">
+            {language === "id" ? "Jadwal & " : "Schedule & "}
             <span className="italic font-normal text-equil-mint/70">
               {language === "id" ? "pemantauan." : "monitoring."}
             </span>
           </h3>
         </div>
-        <div className="flex flex-col items-end gap-3">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={handlePrevMonth}
-              className="w-8 h-8 rounded-full border border-equil-onyx/5 flex items-center justify-center hover:bg-equil-sage/40 transition-colors text-equil-onyx/40 hover:text-equil-onyx text-sm font-bold"
+              className="w-7 h-7 rounded-full border border-equil-onyx/5 flex items-center justify-center hover:bg-equil-sage/40 transition-colors text-equil-onyx/40 hover:text-equil-onyx text-xs font-bold"
               title={language === "id" ? "Bulan Sebelumnya" : "Previous Month"}
             >
               ←
             </button>
-            <span className="text-sm font-display font-black tracking-tightest text-equil-onyx/60 capitalize min-w-[120px] text-center select-none">
+            <span className="text-[11px] font-display font-black tracking-tightest text-equil-onyx/60 uppercase min-w-[95px] text-center select-none">
               {monthLabel}
             </span>
             <button
               onClick={handleNextMonth}
-              className="w-8 h-8 rounded-full border border-equil-onyx/5 flex items-center justify-center hover:bg-equil-sage/40 transition-colors text-equil-onyx/40 hover:text-equil-onyx text-sm font-bold"
+              className="w-7 h-7 rounded-full border border-equil-onyx/5 flex items-center justify-center hover:bg-equil-sage/40 transition-colors text-equil-onyx/40 hover:text-equil-onyx text-xs font-bold"
               title={language === "id" ? "Bulan Berikutnya" : "Next Month"}
             >
               →
             </button>
           </div>
-          {hydrated && (
-            <div className="hidden md:flex items-center gap-4">
-              {[
-                {
-                  color: "bg-equil-mint",
-                  label: language === "id" ? "Selesai" : "Done",
-                },
-                {
-                  color: "bg-equil-coral",
-                  label: language === "id" ? "Belum selesai" : "Pending",
-                },
-                {
-                  color: "bg-equil-coral ring-2 ring-equil-coral/20",
-                  label: "Deadline",
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-1.5">
-                  <span
-                    className={`w-[6px] h-[6px] rounded-full ${item.color}`}
-                  />
-                  <span className="text-[7px] font-mono tracking-[0.2em] text-equil-onyx/25 uppercase">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -524,10 +512,10 @@ export default function InteractiveCalendar() {
       </div>
 
       {/* Trigger Button to Open Drawer */}
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center mt-6">
         <button
           onClick={() => setIsDeadlineDrawerOpen(true)}
-          className="text-[10px] font-mono font-bold tracking-[0.25em] uppercase text-equil-onyx/30 hover:text-equil-mint hover:underline transition-all duration-300 py-2 border-b border-transparent hover:border-equil-mint/30"
+          className="text-[9px] font-mono font-bold tracking-[0.25em] uppercase text-equil-onyx/30 hover:text-equil-mint hover:underline transition-all duration-300 py-1.5 border-b border-transparent hover:border-equil-mint/30"
         >
           {language === "id"
             ? "Tinjau semua Batas waktu →"

@@ -145,7 +145,7 @@ function HeatmapCellComponent({
   return (
     <div className="relative">
       <motion.div
-        className={`w-[13px] h-[13px] md:w-[15px] md:h-[15px] rounded-[3px] cursor-pointer
+        className={`w-[10px] h-[10px] md:w-[11px] md:h-[11px] rounded-[2px] cursor-pointer
           ${INTENSITY_CLASSES[cell.value]}
           border border-equil-forest/[0.03]
           hover:ring-1 hover:ring-equil-mint/30 hover:ring-offset-1 hover:ring-offset-equil-paper
@@ -172,7 +172,7 @@ function HeatmapCellComponent({
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none"
           >
-            <div className="crystal-glass rounded-lg px-3 py-2 shadow-lg min-w-max">
+            <div className="crystal-glass rounded-lg px-3 py-2 shadow-lg min-w-max bg-white/95">
               <p className="text-[9px] font-mono font-bold tracking-[0.15em] text-equil-onyx/80 uppercase">
                 {cell.date}
               </p>
@@ -180,7 +180,7 @@ function HeatmapCellComponent({
                 {cell.count} aktivitas · {label}
               </p>
             </div>
-            <div className="w-2 h-2 bg-white/10 backdrop-blur-xl rotate-45 mx-auto -mt-1 border-r border-b border-white/20" />
+            <div className="w-2 h-2 bg-white border-r border-b border-equil-forest/10 rotate-45 mx-auto -mt-1" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -215,31 +215,75 @@ export default function MaximizedHeatmap() {
   }, []);
 
   return (
-    <section className="w-full pt-12 pb-4" aria-label="Activity heatmap">
+    <section className="w-full relative" aria-label="Activity heatmap">
       {/* Header */}
-      <div className="mb-10">
-        <span className="text-[9px] font-mono tracking-[0.3em] text-equil-onyx/25 uppercase block mb-2">
+      <div className="mb-4">
+        <span className="text-[9px] font-mono tracking-[0.3em] text-equil-onyx/25 uppercase block mb-1">
           03 // {language === 'id' ? 'AKTIVITAS 12 MINGGU' : '12-WEEK ACTIVITY'}
         </span>
-        <h3 className="text-3xl font-display font-black tracking-tightest text-equil-onyx leading-[0.9]">
-          {language === 'id' ? 'Konsistensi' : 'Consistency'}<br />
+        <h3 className="text-xl md:text-2xl font-display font-black tracking-tightest text-equil-onyx leading-none">
+          {language === 'id' ? 'Konsistensi ' : 'Consistency '}
           <span className="italic font-normal text-equil-mint/70">
-            {language === 'id' ? 'perjalananmu.' : 'of your journey.'}
+            {language === 'id' ? 'perjalanan.' : 'of journey.'}
           </span>
         </h3>
       </div>
 
-      {/* ── 2-COLUMN LAYOUT ── */}
-      <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+      {/* ── 1-COLUMN STACKED LAYOUT ── */}
+      <div className="flex flex-col gap-5 w-full">
 
-        {/* LEFT: Heatmap Grid */}
-        <div className="flex-1 min-w-0">
-          <div className="flex gap-[3px]">
+        {/* STATS GRID */}
+        <div className="grid grid-cols-2 gap-4 w-full">
+          {/* Total Activities */}
+          <div className="flex flex-col justify-center">
+            <span className="text-[8px] font-mono tracking-[0.2em] text-equil-onyx/30 uppercase block mb-0.5">
+              {language === 'id' ? 'TOTAL AKTIVITAS' : 'TOTAL ACTIVITIES'}
+            </span>
+            <span className="text-3xl font-display font-black text-equil-onyx leading-none tracking-tightest">
+              {totalCount}
+            </span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className={`text-[10px] font-display font-black tracking-tight ${trendPct >= 0 ? 'text-equil-mint' : 'text-equil-coral'}`}>
+                {trendPct >= 0 ? '↑' : '↓'} {Math.abs(trendPct)}%
+              </span>
+              <span className="text-[8px] font-mono tracking-[0.1em] text-equil-onyx/20 uppercase">
+                vs 4w
+              </span>
+            </div>
+          </div>
+
+          {/* Active Days */}
+          <div className="flex flex-col justify-center">
+            <span className="text-[8px] font-mono tracking-[0.2em] text-equil-onyx/30 uppercase block mb-0.5">
+              {language === 'id' ? 'HARI AKTIF' : 'ACTIVE DAYS'}
+            </span>
+            <span className="text-3xl font-display font-black text-equil-mint leading-none tracking-tightest">
+              {activeDays}
+            </span>
+            <div className="mt-1 flex items-center gap-1.5">
+              <div className="w-12 h-1 bg-equil-sage/60 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-equil-mint rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.round((activeDays / 84) * 100)}%` }}
+                  transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+                />
+              </div>
+              <span className="text-[9px] font-mono font-bold text-equil-onyx/40">
+                {Math.round((activeDays / 84) * 100)}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Heatmap Grid */}
+        <div className="w-full flex flex-col items-center justify-center">
+          <div className="flex gap-[2px] w-full justify-center">
             {/* Day labels */}
-            <div className="flex flex-col gap-[3px] mr-1.5 pt-0.5">
+            <div className="flex flex-col gap-[2px] mr-1 pt-[1px]">
               {dayLabels.map((label, i) => (
-                <div key={i} className="h-[13px] md:h-[15px] flex items-center">
-                  <span className="text-[7px] font-mono tracking-[0.15em] text-equil-onyx/15 uppercase w-4 text-right">
+                <div key={i} className="h-[10px] md:h-[11px] flex items-center">
+                  <span className="text-[6px] font-mono tracking-[0.1em] text-equil-onyx/25 uppercase w-3 text-right">
                     {label}
                   </span>
                 </div>
@@ -248,7 +292,7 @@ export default function MaximizedHeatmap() {
 
             {/* Week columns */}
             {weeks.map((weekCells, weekIndex) => (
-              <div key={weekIndex} className="flex flex-col gap-[3px]">
+              <div key={weekIndex} className="flex flex-col gap-[2px]">
                 {weekCells.map((cell) => {
                   const idx = cell.week * 7 + cell.day;
                   const cfg = floatConfigs[idx];
@@ -267,71 +311,24 @@ export default function MaximizedHeatmap() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-2.5 mt-5">
-            <span className="text-[7px] font-mono tracking-[0.15em] text-equil-onyx/15 uppercase">
+          <div className="flex items-center gap-1.5 mt-3 justify-center">
+            <span className="text-[6px] font-mono tracking-[0.1em] text-equil-onyx/15 uppercase">
               {language === 'id' ? 'Kurang' : 'Less'}
             </span>
             {INTENSITY_CLASSES.map((cls, i) => (
-              <div key={i} className={`w-[11px] h-[11px] rounded-[2px] ${cls} border border-equil-forest/[0.03]`} />
+              <div key={i} className={`w-[9px] h-[9px] rounded-[1.5px] ${cls} border border-equil-forest/[0.03]`} />
             ))}
-            <span className="text-[7px] font-mono tracking-[0.15em] text-equil-onyx/15 uppercase">
+            <span className="text-[6px] font-mono tracking-[0.1em] text-equil-onyx/15 uppercase">
               {language === 'id' ? 'Lebih' : 'More'}
             </span>
           </div>
         </div>
 
-        {/* RIGHT: Giant Stats + Sparkline */}
-        <div className="w-full lg:w-[340px] shrink-0 flex flex-col gap-10">
-
-          {/* Total Activities — GIANT */}
-          <div className="antigravity-card" style={{ animationDelay: '0.3s', animationDuration: '4.5s' }}>
-            <span className="text-[8px] font-mono tracking-[0.35em] text-equil-onyx/20 uppercase block mb-2">
-              {language === 'id' ? 'TOTAL AKTIVITAS' : 'TOTAL ACTIVITIES'}
-            </span>
-            <span className="text-[6rem] md:text-[7rem] font-display font-black text-equil-onyx leading-none tracking-tightest metric-number block">
-              {totalCount}
-            </span>
-            {/* Sparkline underneath */}
-            <div className="mt-4 w-full h-12">
-              <Sparkline data={SPARKLINE_DATA} className="w-full h-full" />
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <span className={`text-xs font-display font-black tracking-tight ${trendPct >= 0 ? 'text-equil-mint' : 'text-equil-coral'}`}>
-                {trendPct >= 0 ? '↑' : '↓'} {Math.abs(trendPct)}%
-              </span>
-              <span className="text-[8px] font-mono tracking-[0.2em] text-equil-onyx/20 uppercase">
-                vs 4 {language === 'id' ? 'minggu lalu' : 'weeks ago'}
-              </span>
-            </div>
-          </div>
-
-          {/* Active Days — GIANT */}
-          <div className="antigravity-card" style={{ animationDelay: '0.8s', animationDuration: '5s' }}>
-            <span className="text-[8px] font-mono tracking-[0.35em] text-equil-onyx/20 uppercase block mb-2">
-              {language === 'id' ? 'HARI AKTIF' : 'ACTIVE DAYS'}
-            </span>
-            <span className="text-[6rem] md:text-[7rem] font-display font-black text-equil-mint leading-none tracking-tightest block">
-              {activeDays}
-            </span>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex-1 h-1.5 bg-equil-sage/40 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-equil-mint rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.round((activeDays / 84) * 100)}%` }}
-                  transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-                />
-              </div>
-              <span className="text-xs font-display font-black text-equil-onyx/40 tracking-tight">
-                {Math.round((activeDays / 84) * 100)}%
-              </span>
-            </div>
-            <span className="text-[8px] font-mono tracking-[0.2em] text-equil-onyx/15 uppercase mt-2 block">
-              {language === 'id' ? 'dari 84 hari tercatat' : 'of 84 tracked days'}
-            </span>
-          </div>
-
+        {/* Sparkline underneath */}
+        <div className="w-full h-8 mt-1">
+          <Sparkline data={SPARKLINE_DATA} className="w-full h-full" />
         </div>
+
       </div>
     </section>
   );

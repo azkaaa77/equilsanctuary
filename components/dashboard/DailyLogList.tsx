@@ -134,13 +134,13 @@ function TaskRow({
         )}
       </div>
 
-      {/* Deadline picker (hover reveal) */}
+      {/* Deadline picker */}
       <button
         onClick={() => {
           setShowDatePicker(!showDatePicker);
           setTimeout(() => dateRef.current?.showPicker(), 50);
         }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 p-1 rounded-md hover:bg-equil-sage/40"
+        className="transition-all duration-200 shrink-0 p-1 rounded-md text-equil-onyx/20 hover:text-equil-mint hover:bg-equil-sage/40"
         title={language === 'id' ? 'Atur deadline' : 'Set deadline'}
       >
         <Calendar size={13} className="text-equil-onyx/15 hover:text-equil-mint transition-colors" />
@@ -156,12 +156,12 @@ function TaskRow({
         }}
       />
 
-      {/* Delete (hover reveal) */}
+      {/* Delete */}
       <button
         onClick={onDelete}
-        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 p-1 rounded-md hover:bg-equil-coral/10"
+        className="transition-all duration-200 shrink-0 p-1 rounded-md text-equil-onyx/20 hover:text-equil-coral hover:bg-equil-coral/10"
       >
-        <X size={14} className="text-equil-onyx/15 hover:text-equil-coral transition-colors" />
+        <X size={14} className="transition-colors" />
       </button>
     </motion.div>
   );

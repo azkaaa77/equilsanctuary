@@ -104,7 +104,7 @@ export const Navbar = () => {
           </div>
 
           {/* 3. Utility Icons (Notification) */}
-          <button className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-equil-onyx/5 transition-all text-equil-onyx">
+          {/* <button className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-equil-onyx/5 transition-all text-equil-onyx">
             <svg
               width="18"
               height="18"
@@ -128,7 +128,7 @@ export const Navbar = () => {
               />
             </svg>
             <span className="absolute top-4 right-4 w-1.5 h-1.5 bg-equil-mint rounded-full shadow-[0_0_10px_rgba(45,106,79,0.5)]" />
-          </button>
+          </button> */}
 
           {/* 4. Auth/Profile Zone */}
           <div className="pl-2">

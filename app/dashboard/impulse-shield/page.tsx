@@ -260,6 +260,10 @@ export default function ImpulseShieldPage() {
   const [itemStress, setItemStress] = useState<StressLevel>(3);
   const [itemReflection, setItemReflection] = useState('');
   const [addingToVault, setAddingToVault] = useState(false);
+  const [editingVaultId, setEditingVaultId] = useState<string | null>(null);
+  const [editVaultName, setEditVaultName] = useState('');
+  const [editVaultPrice, setEditVaultPrice] = useState('');
+  const [editVaultReflection, setEditVaultReflection] = useState('');
 
   // Tracker state
   const [impulseLog, setImpulseLog] = useState<ImpulseLog[]>([]);
@@ -345,6 +349,20 @@ export default function ImpulseShieldPage() {
     const updated = vaultItems.map(i => i.id === id ? { ...i, status } : i);
     setVaultItems(updated);
     localStorage.setItem('is_vault', JSON.stringify(updated));
+  };
+
+  const deleteVaultItem = (id: string) => {
+    const updated = vaultItems.filter(i => i.id !== id);
+    setVaultItems(updated);
+    localStorage.setItem('is_vault', JSON.stringify(updated));
+  };
+
+  const saveEditVaultItem = (id: string) => {
+    if (!editVaultName.trim()) return;
+    const updated = vaultItems.map(i => i.id === id ? { ...i, name: editVaultName, price: parseFloat(editVaultPrice) || 0, reflection: editVaultReflection } : i);
+    setVaultItems(updated);
+    localStorage.setItem('is_vault', JSON.stringify(updated));
+    setEditingVaultId(null);
   };
 
   const savedTotal = vaultItems
@@ -498,28 +516,30 @@ export default function ImpulseShieldPage() {
             <p className="text-[10px] font-mono text-[#141313]/60 tracking-widest max-w-lg">{t.vault.subtitle}</p>
           </div>
 
-          {/* Saved total */}
-          {savedTotal > 0 && (
-            <div className="flex items-center gap-4">
-              <div className="h-px w-8 bg-[#2D6A4F]/30" />
-              <span className="text-[9px] font-mono text-[#2D6A4F]/70 tracking-widest uppercase">
-                {t.vault.savedAmount}: {formatCurrency(savedTotal, itemCurrency)}
-              </span>
-            </div>
-          )}
+          <div className="flex flex-col items-start gap-4">
+            {/* Saved total */}
+            {savedTotal > 0 && (
+              <div className="flex items-center gap-4">
+                <div className="h-px w-8 bg-[#2D6A4F]/30" />
+                <span className="text-[9px] font-mono text-[#2D6A4F]/70 tracking-widest uppercase">
+                  {t.vault.savedAmount}: {formatCurrency(savedTotal, itemCurrency)}
+                </span>
+              </div>
+            )}
 
-          {/* Add to vault toggle */}
-          <div>
-            <button
-              onClick={() => setAddingToVault(!addingToVault)}
-              className={`px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 ${
-                addingToVault
-                  ? 'border border-black/15 text-[#141313]/40 hover:text-[#141313]'
-                  : 'bg-emerald-700 text-white hover:bg-emerald-800'
-              }`}
-            >
-              {addingToVault ? '× BATAL' : `+ ${t.vault.addTitle}`}
-            </button>
+            {/* Add to vault toggle */}
+            <div>
+              <button
+                onClick={() => setAddingToVault(!addingToVault)}
+                className={`px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 ${
+                  addingToVault
+                    ? 'border border-black/15 text-[#141313]/40 hover:text-[#141313]'
+                    : 'bg-emerald-700 text-white hover:bg-emerald-800'
+                }`}
+              >
+                {addingToVault ? '× BATAL' : `+ ${t.vault.addTitle}`}
+              </button>
+            </div>
           </div>
 
           {/* Add form */}
@@ -635,97 +655,160 @@ export default function ImpulseShieldPage() {
 
                 return (
                   <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-3 group">
-                    <div className="flex items-start gap-4">
-                      {/* Category icon */}
-                      <span className="text-base text-[#141313]/30 shrink-0 mt-0.5">{CATEGORY_ICONS[item.category]}</span>
-
-                      <div className="flex-1 min-w-0">
-                        {/* Name + status */}
-                        <div className="flex items-start gap-3 mb-1">
-                          <p className={`text-sm font-sans font-medium flex-1 ${
-                            isAbandoned ? 'line-through text-[#141313]/30' : isDone ? 'text-[#141313]/50' : 'text-[#141313]/80'
-                          }`}>
-                            {item.name}
-                          </p>
-                          <span className={`text-[7px] font-mono tracking-[0.3em] uppercase shrink-0 ${
-                            isLocked ? 'text-[#141313]/40'
-                            : isUnlocked ? 'text-[#2D6A4F]/60'
-                            : isAbandoned ? 'text-[#141313]/20'
-                            : 'text-[#141313]/25'
-                          }`}>
-                            {isLocked ? `🔒 ${t.vault.lockedLabel}` : isUnlocked ? `✓ ${t.vault.unlockedLabel}` : isAbandoned ? t.vault.abandonedLabel : t.vault.unlockedLabel}
-                          </span>
+                    {editingVaultId === item.id ? (
+                      <div className="flex-1 space-y-3">
+                        <input
+                          value={editVaultName}
+                          onChange={e => setEditVaultName(e.target.value)}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                          placeholder={t.vault.namePlaceholder}
+                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={editVaultPrice}
+                            onChange={e => setEditVaultPrice(e.target.value)}
+                            className="bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-mono outline-none focus:border-emerald-400 transition-colors w-32"
+                            placeholder={t.vault.pricePlaceholder}
+                          />
                         </div>
-
-                        {/* Price + stress */}
-                        <div className="flex items-center gap-3 mb-2">
-                          {item.price > 0 && (
-                            <span className="text-[9px] font-mono text-[#141313]/40">
-                              {formatCurrency(item.price, item.currency)}
-                            </span>
-                          )}
-                          <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
-                          <span className="text-[8px] font-mono" style={{ color: STRESS_COLORS[item.stressLevel] + 'CC' }}>
-                            {t.vault.stressLevels[item.stressLevel - 1]}
-                          </span>
-                        </div>
-
-                        {/* Cooling progress bar */}
-                        {isLocked && (
-                          <div className="mb-2">
-                            <div className="h-[2px] w-full bg-black/5 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-[#141313]/20 rounded-full transition-all duration-1000"
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                            <span className="text-[7px] font-mono text-[#141313]/25 mt-1 block">
-                              {formatTimeLeft(msLeft, language)} {t.vault.timeLeft}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Insight */}
-                        {item.stressLevel >= 4 && isLocked && (
-                          <p className="text-[8px] font-mono text-[#FF8A80]/60 italic mb-2">
-                            {t.vault.insight_high}
-                          </p>
-                        )}
-
-                        {/* Reflection */}
-                        {item.reflection && (
-                          <p className="text-[9px] font-sans italic text-[#141313]/30 mb-2">
-                            "{item.reflection}"
-                          </p>
-                        )}
-
-                        {/* Actions */}
-                        {(isUnlocked) && !isDone && !isAbandoned && (
-                          <div className="flex gap-4 mt-2">
-                            <button
-                              onClick={() => updateVaultStatus(item.id, 'unlocked')}
-                              className="text-[8px] font-mono text-[#141313]/40 hover:text-[#141313] transition-colors tracking-widest uppercase"
-                            >
-                              {t.vault.unlockNow}
-                            </button>
-                            <button
-                              onClick={() => updateVaultStatus(item.id, 'abandoned')}
-                              className="text-[8px] font-mono text-[#2D6A4F]/50 hover:text-[#2D6A4F] transition-colors tracking-widest uppercase"
-                            >
-                              {t.vault.confirmAbandon}
-                            </button>
-                          </div>
-                        )}
-                        {isLocked && (
-                          <button
-                            onClick={() => updateVaultStatus(item.id, 'abandoned')}
-                            className="mt-2 text-[8px] font-mono text-[#141313]/20 hover:text-[#141313]/50 transition-colors tracking-widest uppercase opacity-0 group-hover:opacity-100 duration-200"
-                          >
-                            {t.vault.abandon}
+                        <input
+                          value={editVaultReflection}
+                          onChange={e => setEditVaultReflection(e.target.value)}
+                          className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
+                          placeholder={t.vault.reflectionPlaceholder}
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={() => saveEditVaultItem(item.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
+                            {language === 'id' ? 'SIMPAN' : 'SAVE'}
                           </button>
-                        )}
+                          <button onClick={() => setEditingVaultId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
+                            {language === 'id' ? 'BATAL' : 'CANCEL'}
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          {/* Category icon */}
+                          <span className="text-base text-[#141313]/30 shrink-0 mt-0.5">{CATEGORY_ICONS[item.category]}</span>
+
+                          <div className="flex-1 min-w-0">
+                            {/* Name + status */}
+                            <div className="flex items-start gap-3 mb-1">
+                              <p className={`text-sm font-sans font-medium flex-1 ${
+                                isAbandoned ? 'line-through text-[#141313]/30' : isDone ? 'text-[#141313]/50' : 'text-[#141313]/80'
+                              }`}>
+                                {item.name}
+                              </p>
+                              <span className={`text-[7px] font-mono tracking-[0.3em] uppercase shrink-0 ${
+                                isLocked ? 'text-[#141313]/40'
+                                : isUnlocked ? 'text-[#2D6A4F]/60'
+                                : isAbandoned ? 'text-[#141313]/20'
+                                : 'text-[#141313]/25'
+                              }`}>
+                                {isLocked ? `🔒 ${t.vault.lockedLabel}` : isUnlocked ? `✓ ${t.vault.unlockedLabel}` : isAbandoned ? t.vault.abandonedLabel : t.vault.unlockedLabel}
+                              </span>
+                            </div>
+
+                            {/* Price + stress */}
+                            <div className="flex items-center gap-3 mb-2">
+                              {item.price > 0 && (
+                                <span className="text-[9px] font-mono text-[#141313]/40">
+                                  {formatCurrency(item.price, item.currency)}
+                                </span>
+                              )}
+                              <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
+                              <span className="text-[8px] font-mono" style={{ color: STRESS_COLORS[item.stressLevel] + 'CC' }}>
+                                {t.vault.stressLevels[item.stressLevel - 1]}
+                              </span>
+                            </div>
+
+                            {/* Cooling progress bar */}
+                            {isLocked && (
+                              <div className="mb-2">
+                                <div className="h-[2px] w-full bg-black/5 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-[#141313]/20 rounded-full transition-all duration-1000"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className="text-[7px] font-mono text-[#141313]/25 mt-1 block">
+                                  {formatTimeLeft(msLeft, language)} {t.vault.timeLeft}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Insight */}
+                            {item.stressLevel >= 4 && isLocked && (
+                              <p className="text-[8px] font-mono text-[#FF8A80]/60 italic mb-2">
+                                {t.vault.insight_high}
+                              </p>
+                            )}
+
+                            {/* Reflection */}
+                            {item.reflection && (
+                              <p className="text-[9px] font-sans italic text-[#141313]/30 mb-2">
+                                "{item.reflection}"
+                              </p>
+                            )}
+
+                            {/* Actions */}
+                            {(isUnlocked) && !isDone && !isAbandoned && (
+                              <div className="flex gap-4 mt-2">
+                                <button
+                                  onClick={() => updateVaultStatus(item.id, 'unlocked')}
+                                  className="text-[8px] font-mono text-[#141313]/40 hover:text-[#141313] transition-colors tracking-widest uppercase"
+                                >
+                                  {t.vault.unlockNow}
+                                </button>
+                                <button
+                                  onClick={() => updateVaultStatus(item.id, 'abandoned')}
+                                  className="text-[8px] font-mono text-[#2D6A4F]/50 hover:text-[#2D6A4F] transition-colors tracking-widest uppercase"
+                                >
+                                  {t.vault.confirmAbandon}
+                                </button>
+                              </div>
+                            )}
+                            {isLocked && (
+                              <button
+                                onClick={() => updateVaultStatus(item.id, 'abandoned')}
+                                className="mt-2 text-[8px] font-mono text-[#141313]/20 hover:text-[#141313]/50 transition-colors tracking-widest uppercase duration-200"
+                              >
+                                {t.vault.abandon}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Edit & Delete Action Buttons */}
+                        <div className="flex items-center gap-2 shrink-0 m-0">
+                          <button
+                            onClick={() => {
+                              setEditingVaultId(item.id);
+                              setEditVaultName(item.name);
+                              setEditVaultPrice(item.price.toString());
+                              setEditVaultReflection(item.reflection || '');
+                            }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
+                            title="Edit"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => deleteVaultItem(item.id)}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
+                            title="Delete"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -881,20 +964,24 @@ export default function ImpulseShieldPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 shrink-0 m-0">
+                        <div className="flex items-center gap-2 shrink-0 m-0">
                           <button
                             onClick={() => { setEditingLogId(log.id); setEditLogTrigger(log.trigger); setEditLogNote(log.note || ''); }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
                             title="Edit"
                           >
-                            ✎
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z" />
+                            </svg>
                           </button>
                           <button
                             onClick={() => deleteImpulseLog(log.id)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
                             title="Delete"
                           >
-                            ×
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
                           </button>
                         </div>
                       </>
@@ -1078,20 +1165,24 @@ export default function ImpulseShieldPage() {
                           {rule.text}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2 shrink-0 m-0">
+                      <div className="flex items-center gap-2 shrink-0 m-0">
                         <button
                           onClick={() => { setEditingRuleId(rule.id); setEditRuleText(rule.text); }}
-                          className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                          className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
                           title="Edit"
                         >
-                          ✎
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z" />
+                          </svg>
                         </button>
                         <button
                           onClick={() => deleteRule(rule.id)}
-                          className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                          className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
                           title="Delete"
                         >
-                          ×
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>
                         </button>
                       </div>
                     </>

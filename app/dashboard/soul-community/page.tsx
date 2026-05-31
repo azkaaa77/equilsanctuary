@@ -109,7 +109,7 @@ const dict = {
       logPlaceholder:
         "Apa saja interaksi sosialmu hari ini? (rapat, hang out, telepon...)",
       notePlaceholder: "Catatan singkat tentang perasaanmu...",
-      log: "CATAT",
+      log: "Catat",
       history: "Riwayat Baterai",
       emptyHistory: "Belum ada catatan. Mulai catat level bateraimu hari ini.",
       levelLabels: [
@@ -666,21 +666,23 @@ export default function SoulCommunityPage() {
       </section>
 
       {/* ── TABS ── */}
-      <div className="flex gap-0 border-b border-black/8">
-        {(["battery", "bonds", "map", "rituals"] as Tab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-3 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 border-b-2 -mb-px ${
-              activeTab === tab
-                ? "border-[#141313] text-[#141313]"
-                : "border-transparent text-[#141313]/30 hover:text-[#141313]/60"
-            }`}
-          >
-            {t.tabs[tab]}
-          </button>
-        ))}
-      </div>
+      <section>
+        <div className="flex bg-gray-100/60 p-1 rounded-full gap-1">
+          {(["battery", "bonds", "map", "rituals"] as Tab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 py-2.5 text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-300 rounded-full ${
+                activeTab === tab
+                  ? "bg-white text-emerald-800 shadow-sm"
+                  : "text-[#141313]/40 hover:text-[#141313]"
+              }`}
+            >
+              {t.tabs[tab]}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════ */}
       {/* BATTERY                             */}
@@ -771,7 +773,12 @@ export default function SoulCommunityPage() {
             />
             <button
               onClick={logBattery}
-              className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-full px-8 py-3 font-medium transition-colors shadow-sm"
+              disabled={!batteryActivity.trim()}
+              className={
+                batteryActivity.trim()
+                  ? "px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm"
+                  : "px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.3em] uppercase transition-all duration-200 bg-black/5 text-[#141313]/20 cursor-not-allowed"
+              }
             >
               {t.battery.log}
             </button>
@@ -924,8 +931,7 @@ export default function SoulCommunityPage() {
                         </div>
 
                         {/* Bagian Kanan: Grup Tombol Aksi (Edit & Delete) */}
-                        <div className="flex items-center space-x-2 shrink-0 m-0">
-                          {/* Tombol Edit (Icon Pensil) */}
+                        <div className="flex items-center gap-2 shrink-0 m-0">
                           <button
                             onClick={() => {
                               setEditingBatteryId(log.id);
@@ -933,43 +939,42 @@ export default function SoulCommunityPage() {
                               setEditBatteryNote(log.note || "");
                               setEditBatteryLevel(log.level);
                             }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
                             title="Edit"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
                               fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={2}
                               stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              className="w-4 h-4"
                             >
-                              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z"
+                              />
                             </svg>
                           </button>
-
-                          {/* Tombol Delete (Icon X) */}
                           <button
                             onClick={() => deleteBatteryLog(log.id)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
                             title="Delete"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
                               fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={2}
                               stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              className="w-4 h-4"
                             >
-                              <line x1="18" y1="6" x2="6" y2="18"></line>
-                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -1146,8 +1151,8 @@ export default function SoulCommunityPage() {
                 disabled={!bondName.trim()}
                 className={
                   bondName.trim()
-                    ? "bg-emerald-700 hover:bg-emerald-800 text-white rounded-full px-8 py-3 font-medium transition-colors shadow-sm"
-                    : "bg-black/5 text-[#141313]/20 cursor-not-allowed rounded-full px-8 py-3 font-medium transition-colors shadow-sm"
+                    ? "px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 bg-emerald-700 text-white hover:bg-emerald-800 shadow-sm"
+                    : "px-8 py-3 rounded-full text-[9px] font-mono font-bold tracking-[0.35em] uppercase transition-all duration-200 bg-black/5 text-[#141313]/20 cursor-not-allowed"
                 }
               >
                 {t.bonds.add}
@@ -1295,17 +1300,6 @@ export default function SoulCommunityPage() {
                               <p className="text-sm font-sans font-medium text-[#141313]/80 flex-1">
                                 {bond.name}
                               </p>
-                              <span className="text-[8px] font-mono tracking-widest text-[#141313]/40 shrink-0">
-                                {CATEGORY_ICONS[bond.category]}{" "}
-                                {
-                                  (
-                                    t.bonds.categories as Record<
-                                      RelationCategory,
-                                      string
-                                    >
-                                  )[bond.category]
-                                }
-                              </span>
                             </div>
                             <div className="flex items-center gap-3 mb-1.5">
                               <span
@@ -1353,55 +1347,72 @@ export default function SoulCommunityPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 shrink-0 m-0">
-                          <button
-                            onClick={() => {
-                              setEditingBondId(bond.id);
-                              setEditBondName(bond.name);
-                              setEditBondCategory(bond.category);
-                              setEditBondEnergyType(bond.energyType);
-                              setEditBondScore(bond.energyScore);
-                              setEditBondLastSeen(bond.lastInteraction);
-                              setEditBondNotes(bond.notes);
-                              setEditBondTags(bond.tags.join(", "));
-                            }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
-                            title="Edit"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+
+                        <div className="flex flex-col items-end gap-3 shrink-0 m-0">
+                          {/* Teks Kategori (Teman, dll) */}
+                          <span className="text-[8px] font-mono tracking-widest text-[#141313]/40">
+                            {CATEGORY_ICONS[bond.category]}{" "}
+                            {
+                              (
+                                t.bonds.categories as Record<
+                                  RelationCategory,
+                                  string
+                                >
+                              )[bond.category]
+                            }
+                          </span>
+
+                          <div className="flex items-center gap-2 shrink-0 m-0">
+                            <button
+                              onClick={() => {
+                                setEditingBondId(bond.id);
+                                setEditBondName(bond.name);
+                                setEditBondCategory(bond.category);
+                                setEditBondEnergyType(bond.energyType);
+                                setEditBondScore(bond.energyScore);
+                                setEditBondLastSeen(bond.lastInteraction);
+                                setEditBondNotes(bond.notes);
+                                setEditBondTags(bond.tags.join(", "));
+                              }}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
+                              title="Edit"
                             >
-                              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => deleteBond(bond.id)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
-                            title="Delete"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteBond(bond.id)}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
+                              title="Delete"
                             >
-                              <line x1="18" y1="6" x2="6" y2="18"></line>
-                              <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                          </button>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </>
                     )}
@@ -1829,7 +1840,7 @@ export default function SoulCommunityPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 shrink-0 m-0">
+                        <div className="flex flex-col items-end gap-3 shrink-0 m-0">
                           <span
                             className={`text-[7px] font-mono tracking-widest ${
                               done ? "text-slate-600" : "text-[#141313]/30"
@@ -1837,45 +1848,48 @@ export default function SoulCommunityPage() {
                           >
                             {done ? t.rituals.done : t.rituals.undone}
                           </span>
-                          <button
-                            onClick={() => startEditRitual(ritual)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
-                            title="Edit"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          <div className="flex items-center gap-2 shrink-0 m-0">
+                            <button
+                              onClick={() => startEditRitual(ritual)}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
+                              title="Edit"
                             >
-                              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => deleteRitual(ritual.id)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
-                            title="Delete"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 17.651a1.875 1.875 0 0 1-.824.493L3 19l1.137-3.22a1.875 1.875 0 0 1 .493-.824L16.862 4.487z"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteRitual(ritual.id)}
+                              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0"
+                              title="Delete"
                             >
-                              <line x1="18" y1="6" x2="6" y2="18"></line>
-                              <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                          </button>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </>
                     )}

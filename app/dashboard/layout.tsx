@@ -138,6 +138,7 @@ export default function DashboardLayout({
   ];
 
   const isActivePath = (path: string) => {
+    if (path === "/") return pathname === "/";
     if (path === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(path);
   };
@@ -208,14 +209,21 @@ export default function DashboardLayout({
                   key={item.path}
                   href={item.path}
                   onClick={() => setIsSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[4px] text-[10px] font-mono font-bold tracking-[0.2em] uppercase transition-all duration-200 group ${
+                  className={`relative flex items-center gap-3 px-3 py-2.5 text-[10px] font-mono font-bold tracking-[0.2em] uppercase transition-all duration-200 group rounded-[4px] ${
                     active
-                      ? "bg-[#141313] text-[#F9F9F9]"
-                      : "text-[#141313]/50 hover:text-[#141313] hover:bg-black/[0.03]"
+                      ? "bg-[#2D6A4F]/10 text-[#2D6A4F]"
+                      : "text-[#141313]/50 hover:text-[#2D6A4F] hover:bg-black/[0.05] hover:translate-x-1"
                   }`}
                 >
+                  {active && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-[#2D6A4F]" />
+                  )}
                   <span
-                    className={`text-sm transition-colors ${active ? "text-[#F9F9F9]/50" : "text-[#141313]/20 group-hover:text-[#141313]/40"}`}
+                    className={`text-sm transition-colors ${
+                      active
+                        ? "text-[#2D6A4F]"
+                        : "text-[#141313]/20 group-hover:text-[#2D6A4F]/60"
+                    }`}
                   >
                     {item.icon}
                   </span>
@@ -242,19 +250,23 @@ export default function DashboardLayout({
                   key={item.path + item.label}
                   href={item.disabled ? undefined : item.path}
                   onClick={() => !item.disabled && setIsSidebarOpen(false)}
-                  className={`flex items-start gap-3 px-3 py-3 rounded-[4px] transition-all duration-200 group ${
+                  className={`relative flex items-start gap-3 px-3 py-3 rounded-[4px] transition-all duration-200 group ${
                     item.disabled
                       ? "cursor-not-allowed opacity-35"
                       : active
-                        ? "bg-[#141313]"
-                        : "hover:bg-black/[0.03] cursor-pointer"
+                        ? "bg-[#2D6A4F]/10"
+                        : "hover:bg-black/[0.05] hover:translate-x-1 cursor-pointer"
                   }`}
                 >
+                  {/* Active left-border glow indicator */}
+                  {active && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#2D6A4F]" />
+                  )}
                   <span
                     className={`text-sm mt-0.5 shrink-0 transition-colors ${
                       active
-                        ? "text-[#F9F9F9]/50"
-                        : "text-[#141313]/20 group-hover:text-[#141313]/40"
+                        ? "text-[#2D6A4F]"
+                        : "text-[#141313]/20 group-hover:text-[#2D6A4F]/60"
                     }`}
                   >
                     {item.icon}
@@ -263,25 +275,20 @@ export default function DashboardLayout({
                     <p
                       className={`text-[10px] font-mono font-bold tracking-[0.15em] uppercase leading-tight ${
                         active
-                          ? "text-[#F9F9F9]"
-                          : "text-[#141313]/60 group-hover:text-[#141313]"
+                          ? "text-[#2D6A4F]"
+                          : "text-[#141313]/60 group-hover:text-[#2D6A4F]"
                       }`}
                     >
                       {item.label}
                     </p>
                     <p
                       className={`text-[8px] font-mono tracking-wider mt-0.5 ${
-                        active ? "text-[#F9F9F9]/40" : "text-[#141313]/25"
+                        active ? "text-[#2D6A4F]/60" : "text-[#141313]/25"
                       }`}
                     >
                       {item.desc}
                     </p>
                   </div>
-
-                  {/* Active dot on hover (non-active items only) */}
-                  {!item.disabled && !active && (
-                    <span className="w-1 h-1 rounded-full bg-[#2D6A4F] self-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                  )}
                 </a>
               );
             })}

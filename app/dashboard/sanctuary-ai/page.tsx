@@ -391,7 +391,7 @@ export default function SanctuaryAIPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const userMessageCount = useRef(0);
   const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
-  const [editSessionTitle, setEditSessionTitle] = useState('');
+  const [editSessionTitle, setEditSessionTitle] = useState("");
 
   // CRUD state
   const deleteSession = (id: string) => {
@@ -404,9 +404,11 @@ export default function SanctuaryAIPage() {
 
   const saveEditSession = (id: string) => {
     if (!editSessionTitle.trim()) return;
-    setSessions(prev => {
-      const updated = prev.map(s => s.id === id ? { ...s, title: editSessionTitle } : s);
-      localStorage.setItem('ai_sessions', JSON.stringify(updated));
+    setSessions((prev) => {
+      const updated = prev.map((s) =>
+        s.id === id ? { ...s, title: editSessionTitle } : s,
+      );
+      localStorage.setItem("ai_sessions", JSON.stringify(updated));
       return updated;
     });
     setEditingSessionId(null);
@@ -430,9 +432,9 @@ export default function SanctuaryAIPage() {
   }, []);
 
   // Auto-scroll to bottom
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  // useEffect(() => {
+  //   bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  // }, [messages, isTyping]);
 
   // Persist current session on unmount
   const saveSession = useCallback(() => {
@@ -768,16 +770,22 @@ export default function SanctuaryAIPage() {
                       <div className="flex-1 space-y-3">
                         <input
                           value={editSessionTitle}
-                          onChange={e => setEditSessionTitle(e.target.value)}
+                          onChange={(e) => setEditSessionTitle(e.target.value)}
                           className="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-3 py-2 text-xs text-[#141313]/80 font-sans outline-none focus:border-emerald-400 transition-colors"
                           placeholder="Session Title"
                         />
                         <div className="flex gap-2">
-                          <button onClick={() => saveEditSession(session.id)} className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors">
-                            {language === 'id' ? 'SIMPAN' : 'SAVE'}
+                          <button
+                            onClick={() => saveEditSession(session.id)}
+                            className="px-4 py-1.5 bg-emerald-700 text-white text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-emerald-800 transition-colors"
+                          >
+                            {language === "id" ? "SIMPAN" : "SAVE"}
                           </button>
-                          <button onClick={() => setEditingSessionId(null)} className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors">
-                            {language === 'id' ? 'BATAL' : 'CANCEL'}
+                          <button
+                            onClick={() => setEditingSessionId(null)}
+                            className="px-4 py-1.5 border border-gray-200 text-gray-500 text-[8px] font-mono font-bold tracking-widest uppercase rounded-full hover:bg-gray-50 transition-colors"
+                          >
+                            {language === "id" ? "BATAL" : "CANCEL"}
                           </button>
                         </div>
                       </div>
@@ -806,8 +814,9 @@ export default function SanctuaryAIPage() {
                               <span className="w-0.5 h-0.5 rounded-full bg-[#141313]/15" />
                               <span className="text-[7px] font-mono text-[#141313]/50 tracking-widest">
                                 {
-                                  session.messages.filter((m) => m.role === "user")
-                                    .length
+                                  session.messages.filter(
+                                    (m) => m.role === "user",
+                                  ).length
                                 }{" "}
                                 {t.history.messages}
                               </span>
@@ -826,15 +835,18 @@ export default function SanctuaryAIPage() {
                         </div>
                         <div className="flex items-center space-x-2 shrink-0 m-0">
                           <button
-                            onClick={() => { setEditingSessionId(session.id); setEditSessionTitle(session.title); }}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-emerald-600 hover:bg-emerald-50 transition-colors m-0 p-0 opacity-0 group-hover:opacity-100 duration-200"
+                            onClick={() => {
+                              setEditingSessionId(session.id);
+                              setEditSessionTitle(session.title);
+                            }}
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-200 m-0 p-0"
                             title="Rename session"
                           >
                             ✎
                           </button>
                           <button
                             onClick={() => deleteSession(session.id)}
-                            className="flex items-center justify-center w-10 h-10 rounded-xl text-rose-500 hover:bg-rose-50 transition-colors m-0 p-0 text-lg opacity-0 group-hover:opacity-100 duration-200"
+                            className="flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 hover:bg-rose-50 hover:text-rose-500 transition-all duration-200 m-0 p-0 text-lg"
                             title="Delete session"
                           >
                             ×
